@@ -8,7 +8,6 @@ const root = fileURLToPath(new URL('.', import.meta.url))
 const dist = join(root, 'dist')
 const port = Number(process.env.PORT || 8080)
 const verifierUrl = (process.env.VERIFIER_API_URL || 'http://localhost:7004').replace(/\/$/, '')
-const walletUrl = (process.env.PUBLIC_WALLET_URL || 'http://localhost:7104').replace(/\/$/, '')
 const credentialVct = process.env.AGE_CREDENTIAL_VCT || 'http://host.docker.internal:7005/openid4vci/AgeCredential'
 const ttlMs = Number(process.env.VERIFICATION_TTL_MS || 5 * 60_000)
 const flows = new Map()
@@ -55,12 +54,6 @@ function getCreationFields(body) {
   return { id, authorizationUrl }
 }
 
-function toWalletUrl(authorizationUrl) {
-  const marker = authorizationUrl.indexOf('?')
-  const query = marker >= 0 ? authorizationUrl.slice(marker + 1) : ''
-  return `${walletUrl}/api/siop/initiatePresentation${query ? `?${query}` : ''}`
-}
-
 async function startVerification(req, res) {
   const response = await fetch(`${verifierUrl}/verification-session/create`, {
     method: 'POST', headers: { 'content-type': 'application/json' },
@@ -76,7 +69,7 @@ async function startVerification(req, res) {
   const created = getCreationFields(await response.json())
   const id = randomUUID(), owner = randomUUID()
   flows.set(id, { verifierId: created.id, owner, createdAt: Date.now(), consumed: false })
-  json(res, 201, { id, walletUrl: toWalletUrl(created.authorizationUrl) }, { 'set-cookie': cookie('av_flow', owner) })
+  json(res, 201, { id, authorizationUrl: created.authorizationUrl }, { 'set-cookie': cookie('av_flow', owner) })
 }
 
 async function verificationStatus(req, res, id) {
