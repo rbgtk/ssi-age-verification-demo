@@ -1,0 +1,4876 @@
+{
+  "openapi" : "3.1.0",
+  "info" : {
+    "title" : "walt.id wallet",
+    "description" : "Interact with the walt.id wallet. Version is reported to be 1.1.1 and this service instance was started 2026-10-03T13:45:53Z.<br/>Questions about anything here? Visit <a href='https://walt.id/community'>support</a>.<br/>",
+    "contact" : {
+      "name" : "walt.id",
+      "url" : "https://walt.id",
+      "email" : "office@walt.id"
+    },
+    "license" : {
+      "name" : "Apache 2.0",
+      "url" : "https://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version" : "1.1.1"
+  },
+  "externalDocs" : {
+    "description" : "docs.walt.id",
+    "url" : "https://docs.walt.id"
+  },
+  "servers" : [ {
+    "url" : "/",
+    "description" : "Development Server"
+  } ],
+  "tags" : [ ],
+  "paths" : {
+    "/features/registered" : {
+      "get" : {
+        "tags" : [ "Feature management" ],
+        "summary" : "List registered features",
+        "description" : "Lists every feature flag registered by this service instance, regardless of its current state.\nThe response is an object whose keys are stable feature identifiers and whose values are\nhuman-readable descriptions. Use it to discover valid identifiers before changing\n`enabledFeatures` or `disabledFeatures` in feature configuration.\n\nThis endpoint is intentionally public and requires no authentication. It exposes feature names\nand descriptions, but never feature configuration values or secrets. Feature descriptions must\ntherefore not contain sensitive information.",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "All feature identifiers registered by this service and their descriptions",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "additionalProperties" : {
+                    "type" : "string",
+                    "title" : "String"
+                  },
+                  "title" : "LinkedHashMap<String,String>"
+                },
+                "examples" : {
+                  "Registered feature catalog" : {
+                    "value" : {
+                      "web" : "Web service",
+                      "openapi" : "Enables openapi endpoints",
+                      "persistence" : "Storage"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/features/state" : {
+      "get" : {
+        "tags" : [ "Feature management" ],
+        "summary" : "Show feature states",
+        "description" : "Shows how every registered feature is resolved at runtime. The three buckets are mutually\nexclusive:\n\n- `enabled`: features successfully enabled during startup. This includes base features,\n  explicitly enabled features, and features whose declared default is enabled.\n- `disabled`: features explicitly listed in `disabledFeatures` configuration.\n- `defaultedDisabled`: features that were not explicitly configured and whose declared default\n  is disabled.\n\nEach bucket contains `features`, a map from stable feature identifiers to human-readable\ndescriptions, and `total`, the number of entries in that map. There is intentionally no\n`defaultedEnabled` bucket: default-enabled features are activated during startup and reported\nunder `enabled`.\n\nThis endpoint is intentionally public and requires no authentication. It is intended for\ndiagnostics and exposes the service's feature posture, so deployments should account for that\noperational metadata exposure. It does not expose configuration values or secrets and must not\nbe used as an authorization decision point.",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "Runtime state of every registered feature",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.commons.web.modules.FeatureFlagInformationModule.FeatureFlagInformations"
+                },
+                "examples" : {
+                  "Feature state buckets" : {
+                    "value" : {
+                      "enabled" : {
+                        "features" : {
+                          "web" : "Web service",
+                          "openapi" : "Enables openapi endpoints"
+                        },
+                        "total" : 2
+                      },
+                      "disabled" : {
+                        "features" : {
+                          "debug-endpoints" : "Enables various debug endpoints"
+                        },
+                        "total" : 1
+                      },
+                      "defaultedDisabled" : {
+                        "features" : {
+                          "persistence" : "Storage"
+                        },
+                        "total" : 1
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/livez" : {
+      "get" : {
+        "tags" : [ ],
+        "parameters" : [ ],
+        "responses" : { },
+        "deprecated" : false
+      }
+    },
+    "/auth/register" : {
+      "post" : {
+        "tags" : [ ],
+        "parameters" : [ ],
+        "responses" : { },
+        "deprecated" : false
+      }
+    },
+    "/auth/emailpass" : {
+      "post" : {
+        "tags" : [ ],
+        "parameters" : [ ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/id.walt.ktorauthnz.methods.EmailPass.EmailPassCredentials"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Successful authentication",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.ktorauthnz.sessions.AuthSessionInformation"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/auth/logout" : {
+      "post" : {
+        "tags" : [ ],
+        "parameters" : [ ],
+        "responses" : { },
+        "deprecated" : false
+      }
+    },
+    "/auth/account" : {
+      "get" : {
+        "tags" : [ ],
+        "parameters" : [ ],
+        "responses" : { },
+        "deprecated" : false
+      }
+    },
+    "/auth/account/wallets" : {
+      "get" : {
+        "tags" : [ ],
+        "parameters" : [ ],
+        "responses" : { },
+        "deprecated" : false
+      }
+    },
+    "/auth/account/wallets/{walletId}" : {
+      "post" : {
+        "tags" : [ ],
+        "parameters" : [ ],
+        "responses" : { },
+        "deprecated" : false
+      }
+    },
+    "/transaction-data-profiles" : {
+      "get" : {
+        "tags" : [ "Transaction Data" ],
+        "summary" : "List available transaction data type profiles",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/id.walt.commons.config.list.TransactionDataProfile"
+                  },
+                  "title" : "ArrayList<TransactionDataProfile>"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/wallet" : {
+      "get" : {
+        "tags" : [ "Wallet Management" ],
+        "summary" : "List wallet IDs",
+        "description" : "When auth is enabled, returns only wallets owned by the authenticated account.",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "string",
+                    "title" : "String"
+                  },
+                  "title" : "ArrayList<String>"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      },
+      "post" : {
+        "tags" : [ "Wallet Management" ],
+        "summary" : "Create a new wallet",
+        "description" : "Creates a wallet with optional named stores or inline key/DID material.\nOmitting storeIDs auto-creates one in-memory store of each type.",
+        "parameters" : [ ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/id.walt.wallet2.server.handlers.CreateWalletRequest"
+              },
+              "examples" : {
+                "Default — auto-create one store of each type" : {
+                  "value" : { }
+                },
+                "Inline key and DID — no attached stores" : {
+                  "value" : {
+                    "keyStoreIds" : [ ],
+                    "credentialStoreIds" : [ ],
+                    "noDidStore" : true,
+                    "staticKey" : {
+                      "type" : "jwk",
+                      "jwk" : {
+                        "kty" : "OKP",
+                        "crv" : "Ed25519",
+                        "x" : "11qYAYSMxJGKNDAUzHfDQoHZMdBgvPG3Umcatb14L3Rz",
+                        "d" : "n4t_0SPOkIarCSMn9-eMq0InSnBXFA9773BkoXHiLimhM"
+                      }
+                    },
+                    "staticDid" : "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbhnRFvvWUpK"
+                  }
+                },
+                "Single named store of each type" : {
+                  "value" : {
+                    "keyStoreIds" : [ "main-kms" ],
+                    "credentialStoreIds" : [ "main-credentials" ],
+                    "didStoreId" : "main-dids"
+                  }
+                },
+                "Multiple key and credential stores, single shared DID store" : {
+                  "value" : {
+                    "keyStoreIds" : [ "kms-primary", "kms-backup" ],
+                    "credentialStoreIds" : [ "personal-credentials", "work-credentials" ],
+                    "didStoreId" : "shared-dids"
+                  }
+                }
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Wallet created",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.wallet2.server.handlers.WalletCreatedResponse"
+                },
+                "examples" : {
+                  "Created wallet ID" : {
+                    "value" : {
+                      "walletId" : "9bbbc42d-8f3a-4b1c-9e2d-1a2b3c4d5e6f"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/wallet/{walletId}" : {
+      "get" : {
+        "tags" : [ "Wallet Management" ],
+        "summary" : "Get wallet info",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.wallet2.server.handlers.WalletInfoResponse"
+                },
+                "examples" : {
+                  "Wallet with named stores" : {
+                    "value" : {
+                      "walletId" : "9bbbc42d-8f3a-4b1c-9e2d-1a2b3c4d5e6f",
+                      "keyStoreCount" : 1,
+                      "credentialStoreCount" : 1,
+                      "hasDidStore" : true,
+                      "hasStaticKey" : false,
+                      "hasStaticDid" : false,
+                      "keyStoreIds" : [ "main-kms" ],
+                      "credentialStoreIds" : [ "main-credentials" ],
+                      "didStoreId" : "main-dids",
+                      "defaultKeyId" : "v_CW0xP256ExampleKeyId",
+                      "defaultDidId" : "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbhnRFvvWUpK"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Wallet not found",
+            "headers" : { }
+          }
+        },
+        "deprecated" : false
+      },
+      "delete" : {
+        "tags" : [ "Wallet Management" ],
+        "summary" : "Delete a wallet",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Deleted",
+            "headers" : { }
+          },
+          "404" : {
+            "description" : "Wallet not found",
+            "headers" : { }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/wallet/{walletId}/keys" : {
+      "get" : {
+        "tags" : [ "Key Management", "Wallet Management" ],
+        "summary" : "List keys across all key stores",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/id.walt.wallet2.data.WalletKeyInfo"
+                  },
+                  "title" : "ArrayList<WalletKeyInfo>"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/wallet/{walletId}/keys/generate" : {
+      "post" : {
+        "tags" : [ "Key Management", "Wallet Management" ],
+        "summary" : "Generate a new key",
+        "description" : "Generates a key in the wallet's first attached key store and returns its ID.\n\nSupported `keyType` values: `secp256r1` (NIST P-256, default example),\n`Ed25519`, `secp256k1`, `secp384r1`, `secp521r1`, `RSA`, `RSA3072`, `RSA4096`.\n\nWallets with only a `staticKey` and no key stores will not be able to generate keys.",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "description" : "Wallet ID returned by POST /wallet",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "example" : "9bbbc42d-8f3a-4b1c-9e2d-1a2b3c4d5e6f"
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/id.walt.crypto.keys.TypedKeyGenerationRequest"
+              },
+              "examples" : {
+                "secp256r1 / NIST P-256 (JWK)" : {
+                  "value" : {
+                    "backend" : "jwk"
+                  }
+                },
+                "Ed25519 (JWK)" : {
+                  "value" : {
+                    "backend" : "jwk",
+                    "keyType" : "Ed25519"
+                  }
+                },
+                "secp256k1 (JWK)" : {
+                  "value" : {
+                    "backend" : "jwk",
+                    "keyType" : "secp256k1"
+                  }
+                }
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Key generated",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.wallet2.data.WalletKeyInfo"
+                },
+                "examples" : {
+                  "secp256r1 key" : {
+                    "value" : {
+                      "keyId" : "v_CW0xP256ExampleKeyId",
+                      "keyType" : "secp256r1"
+                    }
+                  },
+                  "Ed25519 key" : {
+                    "value" : {
+                      "keyId" : "v_CW0xEd25519ExampleKeyId",
+                      "keyType" : "Ed25519"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/wallet/{walletId}/keys/import" : {
+      "post" : {
+        "tags" : [ "Key Management", "Wallet Management" ],
+        "summary" : "Import an existing key",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/id.walt.wallet2.server.handlers.ImportKeyRequest"
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "201" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.wallet2.data.WalletKeyInfo"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/wallet/{walletId}/keys/{keyId}" : {
+      "get" : {
+        "tags" : [ "Key Management", "Wallet Management" ],
+        "summary" : "Get key metadata",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        }, {
+          "name" : "keyId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.wallet2.data.WalletKeyInfo"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Key not found",
+            "headers" : { }
+          }
+        },
+        "deprecated" : false
+      },
+      "delete" : {
+        "tags" : [ "Key Management", "Wallet Management" ],
+        "summary" : "Delete a key",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        }, {
+          "name" : "keyId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "headers" : { }
+          },
+          "404" : {
+            "headers" : { }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/wallet/{walletId}/keys/{keyId}/set-default" : {
+      "put" : {
+        "tags" : [ "Key Management", "Wallet Management" ],
+        "summary" : "Set this key as the default key for the wallet",
+        "description" : "After this call, issuance and presentation flows will use this key unless overridden per-request.",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        }, {
+          "name" : "keyId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Default updated",
+            "headers" : { }
+          },
+          "404" : {
+            "description" : "Key not found in wallet",
+            "headers" : { }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/wallet/{walletId}/dids" : {
+      "get" : {
+        "tags" : [ "DID Management", "Wallet Management" ],
+        "summary" : "List DIDs",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/id.walt.wallet2.data.WalletDidEntry"
+                  },
+                  "title" : "ArrayList<WalletDidEntry>"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/wallet/{walletId}/dids/create" : {
+      "post" : {
+        "tags" : [ "DID Management", "Wallet Management" ],
+        "summary" : "Create a DID",
+        "description" : "Registers a DID in the wallet's DID store using an existing key.\n\nCommon `method` values: `key` (did:key), `jwk` (did:jwk), `web` (did:web), and `cheqd`.\nWhen `keyId` is omitted, the wallet's default key is used — generate one first via\n`POST /wallet/{walletId}/keys/generate` if the wallet has no keys yet.\n\nPass method-specific registrar arguments in `options`, for example:\n- did:web: `domain` (required), `path` (optional)\n- did:key: `useJwkJcsPub` (optional boolean)\n\nWallets without a DID store (inline `staticDid` or `noDidStore`) will not be able to create DIDs.",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "description" : "Wallet ID returned by POST /wallet",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "example" : "9bbbc42d-8f3a-4b1c-9e2d-1a2b3c4d5e6f"
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/id.walt.wallet2.server.handlers.CreateDidRequest"
+              },
+              "examples" : {
+                "did:key bound to a specific key" : {
+                  "value" : {
+                    "method" : "key",
+                    "keyId" : "v_CW0xEd25519ExampleKeyId"
+                  }
+                },
+                "did:key using the wallet default key" : {
+                  "value" : {
+                    "method" : "key"
+                  }
+                },
+                "did:jwk bound to a specific key" : {
+                  "value" : {
+                    "method" : "jwk",
+                    "keyId" : "v_CW0xP256ExampleKeyId"
+                  }
+                },
+                "did:web with domain and path" : {
+                  "value" : {
+                    "method" : "web",
+                    "keyId" : "v_CW0xEd25519ExampleKeyId",
+                    "options" : {
+                      "domain" : "example.com",
+                      "path" : "/users/alice"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "201" : {
+            "description" : "DID created",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.wallet2.data.WalletDidEntry"
+                },
+                "examples" : {
+                  "did:key entry" : {
+                    "value" : {
+                      "did" : "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbhnRFvvWUpK",
+                      "document" : {
+                        "@context" : "https://www.w3.org/ns/did/v1",
+                        "id" : "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbhnRFvvWUpK"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/wallet/{walletId}/dids/import" : {
+      "post" : {
+        "tags" : [ "DID Management", "Wallet Management" ],
+        "summary" : "Import a DID and its document",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/id.walt.wallet2.server.handlers.ImportDidRequest"
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "201" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.wallet2.data.WalletDidEntry"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/wallet/{walletId}/dids/{did}" : {
+      "get" : {
+        "tags" : [ "DID Management", "Wallet Management" ],
+        "summary" : "Get a DID entry",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        }, {
+          "name" : "did",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.wallet2.data.WalletDidEntry"
+                }
+              }
+            }
+          },
+          "404" : {
+            "headers" : { }
+          }
+        },
+        "deprecated" : false
+      },
+      "delete" : {
+        "tags" : [ "DID Management", "Wallet Management" ],
+        "summary" : "Delete a DID",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        }, {
+          "name" : "did",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "headers" : { }
+          },
+          "404" : {
+            "headers" : { }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/wallet/{walletId}/dids/{did}/set-default" : {
+      "put" : {
+        "tags" : [ "DID Management", "Wallet Management" ],
+        "summary" : "Set this DID as the default DID for the wallet",
+        "description" : "After this call, issuance and presentation flows will use this DID unless overridden per-request.",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        }, {
+          "name" : "did",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Default updated",
+            "headers" : { }
+          },
+          "404" : {
+            "description" : "DID not found in wallet",
+            "headers" : { }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/wallet/{walletId}/credentials" : {
+      "get" : {
+        "tags" : [ "Credentials", "Wallet Management" ],
+        "summary" : "List credentials (metadata only, no raw credential data)",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/id.walt.wallet2.data.StoredCredentialMetadata"
+                  },
+                  "title" : "ArrayList<StoredCredentialMetadata>"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/wallet/{walletId}/credentials/import" : {
+      "post" : {
+        "tags" : [ "Credentials", "Wallet Management" ],
+        "summary" : "Import a raw credential directly",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/id.walt.wallet2.handlers.ImportCredentialRequest"
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "201" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.wallet2.data.StoredCredential"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/wallet/{walletId}/credentials/{credentialId}" : {
+      "get" : {
+        "tags" : [ "Credentials", "Wallet Management" ],
+        "summary" : "Get a credential including raw credential data",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        }, {
+          "name" : "credentialId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.wallet2.data.StoredCredential"
+                }
+              }
+            }
+          },
+          "404" : {
+            "headers" : { }
+          }
+        },
+        "deprecated" : false
+      },
+      "delete" : {
+        "tags" : [ "Credentials", "Wallet Management" ],
+        "summary" : "Delete a credential",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        }, {
+          "name" : "credentialId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "headers" : { }
+          },
+          "404" : {
+            "headers" : { }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/wallet/{walletId}/credentials/receive" : {
+      "post" : {
+        "tags" : [ "Issuance (OpenID4VCI 1.0)", "Wallet Management" ],
+        "summary" : "Receive credential(s) - full pre-authorized code flow",
+        "description" : "Resolves the offer, requests a token, signs proof-of-possession, fetches the credential(s) and stores them. Returns a stream of stored credentials as they arrive.",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/id.walt.wallet2.handlers.ReceiveCredentialRequest"
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "200" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.wallet2.handlers.ReceiveCredentialResult"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Token request failed (e.g. wrong PIN / tx_code)",
+            "headers" : { }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/wallet/{walletId}/credentials/receive/resolve-offer" : {
+      "post" : {
+        "tags" : [ "Issuance (OpenID4VCI 1.0)", "Wallet Management" ],
+        "summary" : "Isolated: resolve a credential offer",
+        "description" : "Resolves the credential offer and returns grant/endpoint summary together with issuer display metadata and offered-credential display/claims for a consent-first UI. Does not retain a preview handle; complete issuance by re-sending the offer to the pre-authorized or authorization-code endpoints.",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/id.walt.wallet2.handlers.ResolveOfferRequest"
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "200" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.wallet2.server.models.ResolveOfferDetailedResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/wallet/{walletId}/credentials/receive/request-token" : {
+      "post" : {
+        "tags" : [ "Issuance (OpenID4VCI 1.0)", "Wallet Management" ],
+        "summary" : "Isolated: exchange pre-authorized code for access token",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/id.walt.wallet2.handlers.RequestTokenRequest"
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "200" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.wallet2.handlers.RequestTokenResult"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/wallet/{walletId}/credentials/receive/request-nonce" : {
+      "post" : {
+        "tags" : [ "Issuance (OpenID4VCI 1.0)", "Wallet Management" ],
+        "summary" : "Isolated: obtain a fresh credential proof nonce",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/id.walt.wallet2.handlers.RequestNonceRequest"
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "200" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.wallet2.handlers.RequestNonceResult"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/wallet/{walletId}/credentials/receive/sign-proof" : {
+      "post" : {
+        "tags" : [ "Issuance (OpenID4VCI 1.0)", "Wallet Management" ],
+        "summary" : "Isolated: sign a proof-of-possession JWT",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/id.walt.wallet2.handlers.SignProofRequest"
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "200" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.wallet2.handlers.SignProofResult"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/wallet/{walletId}/credentials/receive/fetch-credential" : {
+      "post" : {
+        "tags" : [ "Issuance (OpenID4VCI 1.0)", "Wallet Management" ],
+        "summary" : "Isolated: fetch a credential from the issuer's credential endpoint",
+        "description" : "When storeInWallet is true the fetched credential(s) are automatically stored in the wallet, removing the need to call the import endpoint afterwards. Pass credentialIssuerBaseUrl when storing so issuer display metadata and labels are persisted like the full receive path. When the response can contain an mdoc, keyId must identify the exact wallet key used to create proofJwt. If the issuer returns invalid_nonce, request a fresh nonce, sign a new proof, and repeat this isolated fetch step.",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/id.walt.wallet2.handlers.FetchCredentialRequest"
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "200" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.wallet2.handlers.FetchCredentialResult"
+                }
+              }
+            }
+          },
+          "400" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.openid4vci.errors.CredentialError"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/wallet/{walletId}/credentials/receive/authorization-url" : {
+      "post" : {
+        "tags" : [ "Issuance (OpenID4VCI 1.0)", "Wallet Management" ],
+        "summary" : "Auth-code grant: generate authorization redirect URL",
+        "description" : "Resolves the offer and builds the OAuth authorization URL. The caller must redirect to this URL and capture the returned code. The response includes continuation data for later token and credential requests.",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/id.walt.wallet2.handlers.GenerateAuthorizationUrlRequest"
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "200" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.wallet2.handlers.GenerateAuthorizationUrlResult"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/wallet/{walletId}/credentials/receive/exchange-code" : {
+      "post" : {
+        "tags" : [ "Issuance (OpenID4VCI 1.0)", "Wallet Management" ],
+        "summary" : "Auth-code grant: exchange authorization code for access token",
+        "description" : "Exchanges the authorization code for an access token. credentialIssuerBaseUrl is used to resolve authorization server metadata. If attestation is configured and supported by the issuer, the wallet key is used to create token endpoint client authentication headers.",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/id.walt.wallet2.handlers.ExchangeCodeRequest"
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "200" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.wallet2.handlers.RequestTokenResult"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/wallet/{walletId}/credentials/receive/deferred" : {
+      "post" : {
+        "tags" : [ "Issuance (OpenID4VCI 1.0)", "Wallet Management" ],
+        "summary" : "Poll deferred credential endpoint",
+        "description" : "Polls the issuer's deferred credential endpoint for a previously deferred credential. Returns immediately with empty list if still pending. Pass credentialIssuerBaseUrl (and optionally credentialConfigurationId) so issuer display metadata and labels are stored like the full receive path. When the response can contain an mdoc, keyId must identify the exact wallet key used for the original credential request.",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/id.walt.wallet2.handlers.PollDeferredRequest"
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "200" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.wallet2.handlers.ReceiveCredentialResult"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/wallet/{walletId}/credentials/receive/authorized" : {
+      "post" : {
+        "tags" : [ "Issuance (OpenID4VCI 1.0)", "Wallet Management" ],
+        "summary" : "Complete the authorization-code grant",
+        "description" : "Exchanges an authorization code for an access token, builds the proof of possession, fetches the credential(s) and stores them - the authorization-code counterpart of POST /credentials/receive. Pass the code from the redirect callback plus the codeVerifier and endpoints returned by /credentials/receive/authorization-url.",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/id.walt.wallet2.handlers.ReceiveAuthorizedCredentialRequest"
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "200" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.wallet2.handlers.ReceiveCredentialResult"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/wallet/{walletId}/credentials/present" : {
+      "post" : {
+        "tags" : [ "Presentation (OpenID4VP 1.0)", "Wallet Management" ],
+        "summary" : "Present credential(s) — full DCQL flow",
+        "description" : "Resolves the VP request, DCQL-matches credentials from the wallet stores, signs the presentation(s) and submits to the verifier.",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/id.walt.wallet2.handlers.PresentCredentialRequest"
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "200" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.waltid.openid4vp.wallet.WalletPresentFunctionality2.WalletPresentResult"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/wallet/{walletId}/credentials/present/isolated" : {
+      "post" : {
+        "tags" : [ "Presentation (OpenID4VP 1.0)", "Wallet Management" ],
+        "summary" : "Present credential(s) — stateless, inline credentials",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/id.walt.wallet2.handlers.PresentCredentialIsolatedRequest"
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "200" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.waltid.openid4vp.wallet.WalletPresentFunctionality2.WalletPresentResult"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/wallet/{walletId}/credentials/present/resolve-request" : {
+      "post" : {
+        "tags" : [ "Presentation (OpenID4VP 1.0)", "Wallet Management" ],
+        "summary" : "Isolated: parse and resolve a VP authorization request",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/id.walt.wallet2.handlers.ResolveVpRequestRequest"
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "200" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.wallet2.handlers.ResolveVpRequestResult"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/wallet/{walletId}/credentials/present/match-credentials" : {
+      "post" : {
+        "tags" : [ "Presentation (OpenID4VP 1.0)", "Wallet Management" ],
+        "summary" : "Isolated: DCQL-match supplied credentials against a query",
+        "description" : "Stateless — caller provides credentials inline. Use /match-credentials-from-store to match against the wallet's own credential stores.",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/id.walt.wallet2.handlers.MatchCredentialsRequest"
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "200" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.wallet2.handlers.MatchCredentialsResult"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/wallet/{walletId}/credentials/present/match-credentials-from-store" : {
+      "post" : {
+        "tags" : [ "Presentation (OpenID4VP 1.0)", "Wallet Management" ],
+        "summary" : "DCQL-match wallet's stored credentials against a query",
+        "description" : "Loads credentials from the wallet's credential stores and runs DCQL matching — no credentials need to be supplied inline. Use this for consent-preview UIs: show the user what will be shared before calling /present.",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/id.walt.wallet2.handlers.MatchCredentialsFromStoreRequest"
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "200" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.wallet2.handlers.MatchCredentialsResult"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/wallet/{walletId}/credentials/present/build-vp-token" : {
+      "post" : {
+        "tags" : [ "Presentation (OpenID4VP 1.0)", "Wallet Management" ],
+        "summary" : "Build VP token from selected credentials",
+        "description" : "Re-resolves and revalidates the original requestUrl, then builds and signs the vp_token from the credential options (and optional claim disclosures) selected after /preview, or from selectedCredentialIds after /match-credentials-from-store. Do not echo the preview authorizationRequest — pass the same requestUrl used for /preview. Pass the result to /send-response to complete the flow.",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/id.walt.wallet2.handlers.BuildVpTokenRequest"
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "200" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.wallet2.handlers.BuildVpTokenResult"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/wallet/{walletId}/credentials/present/send-response" : {
+      "post" : {
+        "tags" : [ "Presentation (OpenID4VP 1.0)", "Wallet Management" ],
+        "summary" : "Send authorization response to the verifier",
+        "description" : "Re-resolves and revalidates the original requestUrl, then transmits the vp_token (from /build-vp-token) to the verifier according to the response_mode / response_uri / encryption from that freshly resolved request. Do not echo the preview authorizationRequest.",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/id.walt.wallet2.handlers.SendAuthorizationResponseRequest"
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "200" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.waltid.openid4vp.wallet.WalletPresentFunctionality2.WalletPresentResult"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/wallet/{walletId}/credentials/present/preview" : {
+      "post" : {
+        "tags" : [ "Presentation (OpenID4VP 1.0)", "Wallet Management" ],
+        "summary" : "Preview an OpenID4VP request for consent",
+        "description" : "Resolves and validates the VP request and returns the authorization request (display-only), verifier metadata, transaction data, response-encryption state, and the wallet credentials that satisfy each DCQL query with their per-claim selective-disclosure options. Optional request keyId selects the signing key for capability checks; Ready responses include that keyId. Stateless: no preview handle is retained. Complete with /build-vp-token + /send-response using the original requestUrl and the preview keyId (do not echo authorizationRequest), or /reject with requestUrl. If the request is invalid but a response can still be sent, the result has valid=false and an error.",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/id.walt.wallet2.handlers.PreviewPresentationRequest"
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "200" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.wallet2.server.models.PresentationPreviewResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/wallet/{walletId}/credentials/present/reject" : {
+      "post" : {
+        "tags" : [ "Presentation (OpenID4VP 1.0)", "Wallet Management" ],
+        "summary" : "Reject a presentation request",
+        "description" : "Re-resolves the OpenID4VP request from requestUrl and returns the wallet's error response to the verifier when a response channel is available. No preview handle.",
+        "parameters" : [ {
+          "name" : "walletId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/id.walt.wallet2.handlers.RejectPresentationByRequestUrlRequest"
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "200" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.waltid.openid4vp.wallet.WalletPresentFunctionality2.WalletPresentResult"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "id.walt.commons.web.modules.FeatureFlagInformationModule.FeatureFlagInformation" : {
+        "type" : "object",
+        "properties" : {
+          "features" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "LinkedHashMap<String,String>"
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int32",
+            "title" : "Int"
+          }
+        },
+        "required" : [ "features", "total" ],
+        "title" : "FeatureFlagInformationModule.FeatureFlagInformation"
+      },
+      "id.walt.commons.web.modules.FeatureFlagInformationModule.FeatureFlagInformations" : {
+        "type" : "object",
+        "properties" : {
+          "enabled" : {
+            "$ref" : "#/components/schemas/id.walt.commons.web.modules.FeatureFlagInformationModule.FeatureFlagInformation"
+          },
+          "disabled" : {
+            "$ref" : "#/components/schemas/id.walt.commons.web.modules.FeatureFlagInformationModule.FeatureFlagInformation"
+          },
+          "defaultedDisabled" : {
+            "$ref" : "#/components/schemas/id.walt.commons.web.modules.FeatureFlagInformationModule.FeatureFlagInformation"
+          }
+        },
+        "required" : [ "defaultedDisabled", "disabled", "enabled" ],
+        "title" : "FeatureFlagInformationModule.FeatureFlagInformations"
+      },
+      "id.walt.ktorauthnz.methods.EmailPass.EmailPassCredentials" : {
+        "type" : "object",
+        "properties" : {
+          "email" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "password" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "email", "password" ],
+        "title" : "EmailPass.EmailPassCredentials"
+      },
+      "id.walt.ktorauthnz.sessions.AuthSessionStatus" : {
+        "type" : "string",
+        "enum" : [ "INIT", "OK", "SUCCESS", "CONTINUE_NEXT_FLOW", "CONTINUE_NEXT_STEP", "FAILURE" ],
+        "title" : "AuthSessionStatus"
+      },
+      "id.walt.ktorauthnz.sessions.AuthSessionNextStep" : {
+        "anyOf" : [ {
+          "$ref" : "#/components/schemas/custom"
+        }, {
+          "$ref" : "#/components/schemas/redirect"
+        } ],
+        "discriminator" : {
+          "propertyName" : "type"
+        },
+        "title" : "AuthSessionNextStep"
+      },
+      "custom" : {
+        "type" : "object",
+        "properties" : {
+          "data" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonElement"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "data" ],
+        "title" : ""
+      },
+      "kotlinx.serialization.json.JsonElement" : {
+        "type" : "object",
+        "title" : "JsonElement"
+      },
+      "redirect" : {
+        "type" : "object",
+        "properties" : {
+          "url" : {
+            "type" : "string",
+            "title" : "Url"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "url" ],
+        "title" : ""
+      },
+      "id.walt.ktorauthnz.sessions.AuthSessionInformation" : {
+        "type" : "object",
+        "properties" : {
+          "session_id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "status" : {
+            "$ref" : "#/components/schemas/id.walt.ktorauthnz.sessions.AuthSessionStatus"
+          },
+          "current_method" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "next_method" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "next_step" : {
+            "$ref" : "#/components/schemas/id.walt.ktorauthnz.sessions.AuthSessionNextStep"
+          },
+          "next_step_description" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "next_step_informational_message" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "token" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "expiration" : {
+            "type" : "string",
+            "format" : "date-time",
+            "title" : "Instant"
+          }
+        },
+        "required" : [ "session_id", "status" ],
+        "title" : "AuthSessionInformation"
+      },
+      "id.walt.commons.config.list.TransactionDataProfile" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "displayName" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "fields" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          }
+        },
+        "required" : [ "displayName", "fields", "type" ],
+        "title" : "TransactionDataProfile"
+      },
+      "kotlinx.serialization.json.JsonObject" : {
+        "type" : "object",
+        "title" : "JsonObject"
+      },
+      "id.walt.wallet2.server.handlers.CreateWalletRequest" : {
+        "type" : "object",
+        "properties" : {
+          "keyStoreIds" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "credentialStoreIds" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "didStoreId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "noDidStore" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "staticKey" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "staticDid" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "noDidStore" ],
+        "title" : "CreateWalletRequest"
+      },
+      "id.walt.wallet2.server.handlers.WalletCreatedResponse" : {
+        "type" : "object",
+        "properties" : {
+          "walletId" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "walletId" ],
+        "title" : "WalletCreatedResponse"
+      },
+      "id.walt.wallet2.server.handlers.WalletInfoResponse" : {
+        "type" : "object",
+        "properties" : {
+          "walletId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "keyStoreCount" : {
+            "type" : "integer",
+            "format" : "int32",
+            "title" : "Int"
+          },
+          "credentialStoreCount" : {
+            "type" : "integer",
+            "format" : "int32",
+            "title" : "Int"
+          },
+          "hasDidStore" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "hasStaticKey" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "hasStaticDid" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "keyStoreIds" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "credentialStoreIds" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "didStoreId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "defaultKeyId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "defaultDidId" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "credentialStoreCount", "credentialStoreIds", "hasDidStore", "hasStaticDid", "hasStaticKey", "keyStoreCount", "keyStoreIds", "walletId" ],
+        "title" : "WalletInfoResponse"
+      },
+      "id.walt.wallet2.data.WalletKeyInfo" : {
+        "type" : "object",
+        "properties" : {
+          "keyId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "keyType" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "algorithm" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "keyId", "keyType" ],
+        "title" : "WalletKeyInfo"
+      },
+      "aws-rest-api" : {
+        "type" : "object",
+        "properties" : {
+          "keyType" : {
+            "$ref" : "#/components/schemas/id.walt.crypto.keys.KeyType"
+          },
+          "config" : {
+            "$ref" : "#/components/schemas/id.walt.crypto.keys.aws.AWSKeyMetadata"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "config", "keyType" ],
+        "title" : ""
+      },
+      "id.walt.crypto.keys.KeyType" : {
+        "type" : "string",
+        "enum" : [ "Ed25519", "secp256k1", "secp256r1", "secp384r1", "secp521r1", "RSA", "RSA3072", "RSA4096" ],
+        "title" : "KeyType"
+      },
+      "id.walt.crypto.keys.aws.AWSKeyMetadata" : {
+        "type" : "object",
+        "properties" : {
+          "auth" : {
+            "$ref" : "#/components/schemas/id.walt.crypto.keys.aws.AWSAuth"
+          }
+        },
+        "required" : [ "auth" ],
+        "title" : "AWSKeyMetadata"
+      },
+      "id.walt.crypto.keys.aws.AWSAuth" : {
+        "type" : "object",
+        "properties" : {
+          "accessKeyId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "secretAccessKey" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "region" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "roleName" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "title" : "AWSAuth"
+      },
+      "azure-rest-api" : {
+        "type" : "object",
+        "properties" : {
+          "keyType" : {
+            "$ref" : "#/components/schemas/id.walt.crypto.keys.KeyType"
+          },
+          "config" : {
+            "$ref" : "#/components/schemas/id.walt.crypto.keys.azure.AzureKeyMetadata"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "config", "keyType" ],
+        "title" : ""
+      },
+      "id.walt.crypto.keys.azure.AzureKeyMetadata" : {
+        "type" : "object",
+        "properties" : {
+          "auth" : {
+            "$ref" : "#/components/schemas/id.walt.crypto.keys.azure.AzureAuth"
+          },
+          "name" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "auth" ],
+        "title" : "AzureKeyMetadata"
+      },
+      "id.walt.crypto.keys.azure.AzureAuth" : {
+        "type" : "object",
+        "properties" : {
+          "clientId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "clientSecret" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "tenantId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "keyVaultUrl" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "keyVaultUrl" ],
+        "title" : "AzureAuth"
+      },
+      "jwk" : {
+        "type" : "object",
+        "properties" : {
+          "keyType" : {
+            "$ref" : "#/components/schemas/id.walt.crypto.keys.KeyType"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "keyType" ],
+        "title" : ""
+      },
+      "oci-rest-api" : {
+        "type" : "object",
+        "properties" : {
+          "keyType" : {
+            "$ref" : "#/components/schemas/id.walt.crypto.keys.KeyType"
+          },
+          "config" : {
+            "$ref" : "#/components/schemas/id.walt.crypto.keys.oci.OCIKeyMetadata"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "config", "keyType" ],
+        "title" : ""
+      },
+      "id.walt.crypto.keys.oci.OCIKeyMetadata" : {
+        "type" : "object",
+        "properties" : {
+          "tenancyOcid" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "compartmentOcid" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "userOcid" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "fingerprint" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "managementEndpoint" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "cryptoEndpoint" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "signingKeyPem" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "compartmentOcid", "cryptoEndpoint", "fingerprint", "managementEndpoint", "tenancyOcid", "userOcid" ],
+        "title" : "OCIKeyMetadata"
+      },
+      "tse" : {
+        "type" : "object",
+        "properties" : {
+          "keyType" : {
+            "$ref" : "#/components/schemas/id.walt.crypto.keys.KeyType"
+          },
+          "config" : {
+            "$ref" : "#/components/schemas/id.walt.crypto.keys.tse.TSEKeyMetadata"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "config", "keyType" ],
+        "title" : ""
+      },
+      "id.walt.crypto.keys.tse.TSEKeyMetadata" : {
+        "type" : "object",
+        "properties" : {
+          "server" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "auth" : {
+            "$ref" : "#/components/schemas/id.walt.crypto.keys.tse.TSEAuth"
+          },
+          "namespace" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "auth", "server" ],
+        "title" : "TSEKeyMetadata"
+      },
+      "id.walt.crypto.keys.tse.TSEAuth" : {
+        "type" : "object",
+        "properties" : {
+          "accessKey" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "roleId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "secretId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "userpassPath" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "username" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "password" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "userpassPath" ],
+        "title" : "TSEAuth"
+      },
+      "id.walt.crypto.keys.TypedKeyGenerationRequest" : {
+        "anyOf" : [ {
+          "$ref" : "#/components/schemas/aws-rest-api"
+        }, {
+          "$ref" : "#/components/schemas/azure-rest-api"
+        }, {
+          "$ref" : "#/components/schemas/jwk"
+        }, {
+          "$ref" : "#/components/schemas/oci-rest-api"
+        }, {
+          "$ref" : "#/components/schemas/tse"
+        } ],
+        "discriminator" : {
+          "propertyName" : "type"
+        },
+        "title" : "TypedKeyGenerationRequest"
+      },
+      "id.walt.wallet2.server.handlers.ImportKeyRequest" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          }
+        },
+        "required" : [ "key" ],
+        "title" : "ImportKeyRequest"
+      },
+      "id.walt.wallet2.data.WalletDidEntry" : {
+        "type" : "object",
+        "properties" : {
+          "did" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "document" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          }
+        },
+        "required" : [ "did", "document" ],
+        "title" : "WalletDidEntry"
+      },
+      "id.walt.wallet2.server.handlers.CreateDidRequest" : {
+        "type" : "object",
+        "properties" : {
+          "method" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "keyId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "options" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string",
+              "title" : "JsonPrimitive"
+            },
+            "title" : "LinkedHashMap<String,JsonPrimitive>"
+          }
+        },
+        "required" : [ "method", "options" ],
+        "title" : "CreateDidRequest"
+      },
+      "id.walt.wallet2.server.handlers.ImportDidRequest" : {
+        "type" : "object",
+        "properties" : {
+          "did" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "document" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "did", "document" ],
+        "title" : "ImportDidRequest"
+      },
+      "id.walt.wallet2.data.StoredCredentialMetadata" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "format" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "issuer" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "subject" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "label" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "addedAt" : {
+            "type" : "string",
+            "format" : "date-time",
+            "title" : "Instant"
+          }
+        },
+        "required" : [ "format", "id" ],
+        "title" : "StoredCredentialMetadata"
+      },
+      "id.walt.wallet2.handlers.ImportCredentialRequest" : {
+        "type" : "object",
+        "properties" : {
+          "rawCredential" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "label" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "rawCredential" ],
+        "title" : "ImportCredentialRequest"
+      },
+      "id.walt.credentials.formats.DigitalCredential" : {
+        "anyOf" : [ {
+          "$ref" : "#/components/schemas/vc-w3c_1_1"
+        }, {
+          "$ref" : "#/components/schemas/vc-w3c_2"
+        }, {
+          "$ref" : "#/components/schemas/vc-mdocs"
+        }, {
+          "$ref" : "#/components/schemas/vc-sd_jwt"
+        } ],
+        "discriminator" : {
+          "propertyName" : "type"
+        },
+        "title" : "DigitalCredential"
+      },
+      "vc-w3c_1_1" : {
+        "type" : "object",
+        "properties" : {
+          "disclosables" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string",
+                "title" : "String"
+              },
+              "title" : "LinkedHashSet<String>",
+              "uniqueItems" : true
+            },
+            "title" : "LinkedHashMap<String,LinkedHashSet<String>>"
+          },
+          "disclosures" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.credentials.signatures.sdjwt.SdJwtSelectiveDisclosure"
+            },
+            "title" : "ArrayList<SdJwtSelectiveDisclosure>"
+          },
+          "signedWithDisclosures" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "credentialData" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "originalCredentialData" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "issuer" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "subject" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "signature" : {
+            "$ref" : "#/components/schemas/id.walt.credentials.signatures.CredentialSignature"
+          },
+          "signed" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "format" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "credentialData", "format" ],
+        "title" : ""
+      },
+      "id.walt.credentials.signatures.sdjwt.SdJwtSelectiveDisclosure" : {
+        "type" : "object",
+        "properties" : {
+          "salt" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "name" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "value" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonElement"
+          },
+          "location" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonElement"
+            },
+            "title" : "ArrayList<JsonElement>"
+          },
+          "encoded" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "encoded", "salt", "value" ],
+        "title" : "SdJwtSelectiveDisclosure"
+      },
+      "id.walt.credentials.signatures.CredentialSignature" : {
+        "anyOf" : [ {
+          "$ref" : "#/components/schemas/signature-cose"
+        }, {
+          "$ref" : "#/components/schemas/signature-dip"
+        }, {
+          "$ref" : "#/components/schemas/signature-jwt"
+        }, {
+          "$ref" : "#/components/schemas/signature-sd_jwt"
+        } ],
+        "discriminator" : {
+          "propertyName" : "type"
+        },
+        "title" : "CredentialSignature"
+      },
+      "signature-cose" : {
+        "type" : "object",
+        "properties" : {
+          "signerKey" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "x5cList" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "X5CCertificateString"
+            },
+            "title" : "X5CList"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "signerKey" ],
+        "title" : ""
+      },
+      "signature-dip" : {
+        "type" : "object",
+        "properties" : {
+          "signature" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "signature" ],
+        "title" : ""
+      },
+      "signature-jwt" : {
+        "type" : "object",
+        "properties" : {
+          "signature" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "jwtHeader" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "signature" ],
+        "title" : ""
+      },
+      "signature-sd_jwt" : {
+        "type" : "object",
+        "properties" : {
+          "signature" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "jwtHeader" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "providedDisclosures" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.credentials.signatures.sdjwt.SdJwtSelectiveDisclosure"
+            },
+            "title" : "ArrayList<SdJwtSelectiveDisclosure>"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "signature" ],
+        "title" : ""
+      },
+      "vc-w3c_2" : {
+        "type" : "object",
+        "properties" : {
+          "disclosables" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string",
+                "title" : "String"
+              },
+              "title" : "LinkedHashSet<String>",
+              "uniqueItems" : true
+            },
+            "title" : "LinkedHashMap<String,LinkedHashSet<String>>"
+          },
+          "disclosures" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.credentials.signatures.sdjwt.SdJwtSelectiveDisclosure"
+            },
+            "title" : "ArrayList<SdJwtSelectiveDisclosure>"
+          },
+          "signedWithDisclosures" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "credentialData" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "originalCredentialData" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "issuer" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "subject" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "signature" : {
+            "$ref" : "#/components/schemas/id.walt.credentials.signatures.CredentialSignature"
+          },
+          "signed" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "format" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "credentialData", "format" ],
+        "title" : ""
+      },
+      "vc-mdocs" : {
+        "type" : "object",
+        "properties" : {
+          "credentialData" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "signed" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "docType" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "signature" : {
+            "$ref" : "#/components/schemas/id.walt.credentials.signatures.CredentialSignature"
+          },
+          "issuer" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "subject" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "format" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "mso" : {
+            "$ref" : "#/components/schemas/id.walt.mdoc.objects.mso.MobileSecurityObject"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "credentialData", "docType", "format" ],
+        "title" : ""
+      },
+      "id.walt.mdoc.objects.mso.MobileSecurityObject" : {
+        "type" : "object",
+        "properties" : {
+          "version" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "digestAlgorithm" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "valueDigests" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "$ref" : "#/components/schemas/kotlinx.serialization.ContextualSerializer<ValueDigestList>"
+            },
+            "title" : "LinkedHashMap<String,ContextualSerializer<ValueDigestList>>"
+          },
+          "deviceKeyInfo" : {
+            "$ref" : "#/components/schemas/id.walt.mdoc.objects.mso.DeviceKeyInfo"
+          },
+          "docType" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "validityInfo" : {
+            "$ref" : "#/components/schemas/id.walt.mdoc.objects.mso.ValidityInfo"
+          },
+          "status" : {
+            "$ref" : "#/components/schemas/id.walt.mdoc.objects.mso.Status"
+          }
+        },
+        "required" : [ "deviceKeyInfo", "digestAlgorithm", "docType", "validityInfo", "valueDigests", "version" ],
+        "title" : "MobileSecurityObject"
+      },
+      "kotlinx.serialization.ContextualSerializer<ValueDigestList>" : {
+        "type" : "object",
+        "properties" : { },
+        "title" : "ContextualSerializer<ValueDigestList>"
+      },
+      "id.walt.mdoc.objects.mso.DeviceKeyInfo" : {
+        "type" : "object",
+        "properties" : {
+          "deviceKey" : {
+            "$ref" : "#/components/schemas/id.walt.cose.CoseKey"
+          },
+          "keyAuthorizations" : {
+            "$ref" : "#/components/schemas/id.walt.mdoc.objects.mso.KeyAuthorization"
+          },
+          "keyInfo" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "LinkedHashMap<Int,String>"
+          }
+        },
+        "required" : [ "deviceKey" ],
+        "title" : "DeviceKeyInfo"
+      },
+      "id.walt.cose.CoseKey" : {
+        "type" : "object",
+        "properties" : {
+          "kty" : {
+            "type" : "integer",
+            "format" : "int32",
+            "title" : "Int"
+          },
+          "kid" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "maximum" : 127,
+              "minimum" : -128,
+              "title" : "Byte"
+            },
+            "title" : "ByteArray<Byte>"
+          },
+          "alg" : {
+            "type" : "integer",
+            "format" : "int32",
+            "title" : "Int"
+          },
+          "key_ops" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "format" : "int32",
+              "title" : "Int"
+            },
+            "title" : "ArrayList<Int>"
+          },
+          "Base IV" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "maximum" : 127,
+              "minimum" : -128,
+              "title" : "Byte"
+            },
+            "title" : "ByteArray<Byte>"
+          },
+          "crv" : {
+            "type" : "integer",
+            "format" : "int32",
+            "title" : "Int"
+          },
+          "x" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "maximum" : 127,
+              "minimum" : -128,
+              "title" : "Byte"
+            },
+            "title" : "ByteArray<Byte>"
+          },
+          "y" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "maximum" : 127,
+              "minimum" : -128,
+              "title" : "Byte"
+            },
+            "title" : "ByteArray<Byte>"
+          },
+          "d" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "maximum" : 127,
+              "minimum" : -128,
+              "title" : "Byte"
+            },
+            "title" : "ByteArray<Byte>"
+          }
+        },
+        "required" : [ "kty" ],
+        "title" : "CoseKey"
+      },
+      "id.walt.mdoc.objects.mso.KeyAuthorization" : {
+        "type" : "object",
+        "properties" : {
+          "nameSpaces" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "dataElements" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string",
+                "title" : "String"
+              },
+              "title" : "ArrayList<String>"
+            },
+            "title" : "LinkedHashMap<String,ArrayList<String>>"
+          }
+        },
+        "title" : "KeyAuthorization"
+      },
+      "id.walt.mdoc.objects.mso.ValidityInfo" : {
+        "type" : "object",
+        "properties" : {
+          "signed" : {
+            "type" : "string",
+            "title" : "MdocTDateInstant"
+          },
+          "validFrom" : {
+            "type" : "string",
+            "title" : "MdocTDateInstant"
+          },
+          "validUntil" : {
+            "type" : "string",
+            "title" : "MdocTDateInstant"
+          },
+          "expectedUpdate" : {
+            "type" : "string",
+            "title" : "MdocTDateInstant"
+          }
+        },
+        "required" : [ "signed", "validFrom", "validUntil" ],
+        "title" : "ValidityInfo"
+      },
+      "id.walt.mdoc.objects.mso.Status" : {
+        "type" : "object",
+        "properties" : {
+          "identifier_list" : {
+            "$ref" : "#/components/schemas/id.walt.mdoc.objects.mso.Status.IdentifierListInfo"
+          },
+          "status_list" : {
+            "$ref" : "#/components/schemas/id.walt.mdoc.objects.mso.Status.StatusListInfo"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "purpose" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "index" : {
+            "type" : "integer",
+            "format" : "int32",
+            "title" : "Int"
+          },
+          "uri" : {
+            "type" : "string",
+            "title" : "UniformResourceIdentifier"
+          }
+        },
+        "title" : "Status"
+      },
+      "id.walt.mdoc.objects.mso.Status.IdentifierListInfo" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "maximum" : 127,
+              "minimum" : -128,
+              "title" : "Byte"
+            },
+            "title" : "ByteArray<Byte>"
+          },
+          "uri" : {
+            "type" : "string",
+            "title" : "UniformResourceIdentifier"
+          },
+          "certificate" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "maximum" : 127,
+              "minimum" : -128,
+              "title" : "Byte"
+            },
+            "title" : "ByteArray<Byte>"
+          }
+        },
+        "required" : [ "id", "uri" ],
+        "title" : "Status.IdentifierListInfo"
+      },
+      "id.walt.mdoc.objects.mso.Status.StatusListInfo" : {
+        "type" : "object",
+        "properties" : {
+          "idx" : {
+            "type" : "integer",
+            "title" : "ULong"
+          },
+          "uri" : {
+            "type" : "string",
+            "title" : "UniformResourceIdentifier"
+          }
+        },
+        "required" : [ "idx", "uri" ],
+        "title" : "Status.StatusListInfo"
+      },
+      "vc-sd_jwt" : {
+        "type" : "object",
+        "properties" : {
+          "dmtype" : {
+            "$ref" : "#/components/schemas/id.walt.credentials.CredentialDetectorTypes.SDJWTVCSubType"
+          },
+          "disclosables" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string",
+                "title" : "String"
+              },
+              "title" : "LinkedHashSet<String>",
+              "uniqueItems" : true
+            },
+            "title" : "LinkedHashMap<String,LinkedHashSet<String>>"
+          },
+          "disclosures" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.credentials.signatures.sdjwt.SdJwtSelectiveDisclosure"
+            },
+            "title" : "ArrayList<SdJwtSelectiveDisclosure>"
+          },
+          "signedWithDisclosures" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "credentialData" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "originalCredentialData" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "issuer" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "subject" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "signature" : {
+            "$ref" : "#/components/schemas/id.walt.credentials.signatures.CredentialSignature"
+          },
+          "signed" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "format" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "credentialData", "dmtype", "format" ],
+        "title" : ""
+      },
+      "id.walt.credentials.CredentialDetectorTypes.SDJWTVCSubType" : {
+        "type" : "string",
+        "enum" : [ "sdjwtvcdm", "sdjwtvc" ],
+        "title" : "CredentialDetectorTypes.SDJWTVCSubType"
+      },
+      "id.walt.wallet2.data.HolderKeyBinding" : {
+        "type" : "object",
+        "properties" : {
+          "schemaVersion" : {
+            "type" : "integer",
+            "format" : "int32",
+            "title" : "Int"
+          },
+          "keyReference" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "publicKeyThumbprint" : {
+            "$ref" : "#/components/schemas/id.walt.wallet2.data.PublicKeyThumbprint"
+          },
+          "origin" : {
+            "$ref" : "#/components/schemas/id.walt.wallet2.data.HolderKeyBindingOrigin"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time",
+            "title" : "Instant"
+          },
+          "extractorVersion" : {
+            "type" : "integer",
+            "format" : "int32",
+            "title" : "Int"
+          }
+        },
+        "required" : [ "createdAt", "extractorVersion", "keyReference", "origin", "publicKeyThumbprint", "schemaVersion" ],
+        "title" : "HolderKeyBinding"
+      },
+      "id.walt.wallet2.data.PublicKeyThumbprint" : {
+        "type" : "object",
+        "properties" : {
+          "algorithm" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "value" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "algorithm", "value" ],
+        "title" : "PublicKeyThumbprint"
+      },
+      "id.walt.wallet2.data.HolderKeyBindingOrigin" : {
+        "type" : "string",
+        "enum" : [ "issuance", "import" ],
+        "title" : "HolderKeyBindingOrigin"
+      },
+      "id.walt.wallet2.data.StoredCredential" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "credential" : {
+            "$ref" : "#/components/schemas/id.walt.credentials.formats.DigitalCredential"
+          },
+          "label" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "addedAt" : {
+            "type" : "string",
+            "format" : "date-time",
+            "title" : "Instant"
+          },
+          "metadata" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "holderKeyBinding" : {
+            "$ref" : "#/components/schemas/id.walt.wallet2.data.HolderKeyBinding"
+          }
+        },
+        "required" : [ "credential", "id" ],
+        "title" : "StoredCredential"
+      },
+      "id.walt.wallet2.handlers.ReceiveCredentialRequest" : {
+        "type" : "object",
+        "properties" : {
+          "offerUrl" : {
+            "type" : "string",
+            "title" : "Url"
+          },
+          "offerJson" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "key" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "keyId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "did" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "txCode" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "clientId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "redirectUri" : {
+            "type" : "string",
+            "title" : "Url"
+          },
+          "tokenRequestHeaders" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "LinkedHashMap<String,String>"
+          },
+          "metadata" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          }
+        },
+        "required" : [ "clientId", "redirectUri", "tokenRequestHeaders" ],
+        "title" : "ReceiveCredentialRequest"
+      },
+      "id.walt.wallet2.handlers.ReceiveCredentialResult" : {
+        "type" : "object",
+        "properties" : {
+          "credentialIds" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "deferredTransactionIds" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "LinkedHashMap<String,String>"
+          }
+        },
+        "required" : [ "credentialIds", "deferredTransactionIds" ],
+        "title" : "ReceiveCredentialResult"
+      },
+      "id.walt.wallet2.handlers.ResolveOfferRequest" : {
+        "type" : "object",
+        "properties" : {
+          "offerUrl" : {
+            "type" : "string",
+            "title" : "Url"
+          },
+          "offerJson" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          }
+        },
+        "title" : "ResolveOfferRequest"
+      },
+      "id.walt.wallet2.server.models.OfferIssuerMetadata" : {
+        "type" : "object",
+        "properties" : {
+          "credentialIssuer" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "display" : {
+            "$ref" : "#/components/schemas/id.walt.wallet2.server.models.OfferMetadataDisplay"
+          }
+        },
+        "required" : [ "credentialIssuer" ],
+        "title" : "OfferIssuerMetadata"
+      },
+      "id.walt.wallet2.server.models.OfferMetadataDisplay" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "locale" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "logoUri" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "logoAltText" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "description" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "backgroundColor" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "backgroundImageUri" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "textColor" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "title" : "OfferMetadataDisplay"
+      },
+      "id.walt.wallet2.server.models.OfferedCredentialMetadata" : {
+        "type" : "object",
+        "properties" : {
+          "configurationId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "format" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "scope" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "vct" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "doctype" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "display" : {
+            "$ref" : "#/components/schemas/id.walt.wallet2.server.models.OfferMetadataDisplay"
+          },
+          "claims" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.wallet2.server.models.OfferClaimMetadata"
+            },
+            "title" : "ArrayList<OfferClaimMetadata>"
+          }
+        },
+        "required" : [ "claims", "configurationId", "format" ],
+        "title" : "OfferedCredentialMetadata"
+      },
+      "id.walt.wallet2.server.models.OfferClaimMetadata" : {
+        "type" : "object",
+        "properties" : {
+          "path" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "mandatory" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "displayName" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "path" ],
+        "title" : "OfferClaimMetadata"
+      },
+      "id.walt.wallet2.server.models.OfferTransactionCodeRequirement" : {
+        "type" : "object",
+        "properties" : {
+          "inputMode" : {
+            "$ref" : "#/components/schemas/id.walt.wallet2.server.models.OfferTransactionCodeInputMode"
+          },
+          "length" : {
+            "type" : "integer",
+            "format" : "int32",
+            "title" : "Int"
+          },
+          "description" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "inputMode" ],
+        "title" : "OfferTransactionCodeRequirement"
+      },
+      "id.walt.wallet2.server.models.OfferTransactionCodeInputMode" : {
+        "type" : "string",
+        "enum" : [ "numeric", "text" ],
+        "title" : "OfferTransactionCodeInputMode"
+      },
+      "id.walt.wallet2.server.models.ResolveOfferDetailedResponse" : {
+        "type" : "object",
+        "properties" : {
+          "credentialIssuer" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "credentialConfigurationIds" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "grantType" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "preAuthorizedCode" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "txCodeRequired" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "credentialEndpoint" : {
+            "type" : "string",
+            "title" : "Url"
+          },
+          "tokenEndpoint" : {
+            "type" : "string",
+            "title" : "Url"
+          },
+          "nonceEndpoint" : {
+            "type" : "string",
+            "title" : "Url"
+          },
+          "issuer" : {
+            "$ref" : "#/components/schemas/id.walt.wallet2.server.models.OfferIssuerMetadata"
+          },
+          "offeredCredentials" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.wallet2.server.models.OfferedCredentialMetadata"
+            },
+            "title" : "ArrayList<OfferedCredentialMetadata>"
+          },
+          "transactionCode" : {
+            "$ref" : "#/components/schemas/id.walt.wallet2.server.models.OfferTransactionCodeRequirement"
+          }
+        },
+        "required" : [ "credentialConfigurationIds", "credentialEndpoint", "credentialIssuer", "issuer", "offeredCredentials", "txCodeRequired" ],
+        "title" : "ResolveOfferDetailedResponse"
+      },
+      "id.walt.wallet2.handlers.RequestTokenRequest" : {
+        "type" : "object",
+        "properties" : {
+          "tokenEndpoint" : {
+            "type" : "string",
+            "title" : "Url"
+          },
+          "preAuthorizedCode" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "credentialIssuer" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "txCode" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "clientId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "redirectUri" : {
+            "type" : "string",
+            "title" : "Url"
+          },
+          "tokenRequestHeaders" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "LinkedHashMap<String,String>"
+          },
+          "anonymousPreAuthorizedCode" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          }
+        },
+        "required" : [ "anonymousPreAuthorizedCode", "clientId", "preAuthorizedCode", "redirectUri", "tokenEndpoint", "tokenRequestHeaders" ],
+        "title" : "RequestTokenRequest"
+      },
+      "id.walt.wallet2.handlers.RequestTokenResult" : {
+        "type" : "object",
+        "properties" : {
+          "accessToken" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "expiresIn" : {
+            "type" : "integer",
+            "format" : "int64",
+            "title" : "Long"
+          },
+          "tokenType" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "accessToken" ],
+        "title" : "RequestTokenResult"
+      },
+      "id.walt.wallet2.handlers.RequestNonceRequest" : {
+        "type" : "object",
+        "properties" : {
+          "credentialIssuer" : {
+            "type" : "string",
+            "title" : "Url"
+          }
+        },
+        "required" : [ "credentialIssuer" ],
+        "title" : "RequestNonceRequest"
+      },
+      "id.walt.wallet2.handlers.RequestNonceResult" : {
+        "type" : "object",
+        "properties" : {
+          "nonce" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "title" : "RequestNonceResult"
+      },
+      "id.walt.wallet2.handlers.SignProofRequest" : {
+        "type" : "object",
+        "properties" : {
+          "issuerUrl" : {
+            "type" : "string",
+            "title" : "Url"
+          },
+          "credentialConfigurationId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "nonce" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "key" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "keyId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "did" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "clientId" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "credentialConfigurationId", "issuerUrl" ],
+        "title" : "SignProofRequest"
+      },
+      "id.walt.wallet2.handlers.SignProofResult" : {
+        "type" : "object",
+        "properties" : {
+          "proofJwt" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "proofJwt" ],
+        "title" : "SignProofResult"
+      },
+      "id.walt.wallet2.handlers.FetchCredentialRequest" : {
+        "type" : "object",
+        "properties" : {
+          "credentialEndpoint" : {
+            "type" : "string",
+            "title" : "Url"
+          },
+          "accessToken" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "credentialConfigurationId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "proofJwt" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "clientId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "storeInWallet" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "credentialIssuerBaseUrl" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "metadata" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "label" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "keyId" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "accessToken", "clientId", "credentialConfigurationId", "credentialEndpoint", "storeInWallet" ],
+        "title" : "FetchCredentialRequest"
+      },
+      "id.walt.wallet2.handlers.FetchCredentialResult" : {
+        "type" : "object",
+        "properties" : {
+          "rawCredentials" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          }
+        },
+        "required" : [ "rawCredentials" ],
+        "title" : "FetchCredentialResult"
+      },
+      "id.walt.openid4vci.errors.CredentialError" : {
+        "type" : "object",
+        "properties" : {
+          "error" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "error_description" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "error" ],
+        "title" : "CredentialError"
+      },
+      "id.walt.wallet2.handlers.GenerateAuthorizationUrlRequest" : {
+        "type" : "object",
+        "properties" : {
+          "offerUrl" : {
+            "type" : "string",
+            "title" : "Url"
+          },
+          "offerJson" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "clientId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "redirectUri" : {
+            "type" : "string",
+            "title" : "Url"
+          },
+          "usePkce" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "useScope" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          }
+        },
+        "required" : [ "clientId", "redirectUri", "usePkce", "useScope" ],
+        "title" : "GenerateAuthorizationUrlRequest"
+      },
+      "id.walt.wallet2.handlers.GenerateAuthorizationUrlResult" : {
+        "type" : "object",
+        "properties" : {
+          "authorizationUrl" : {
+            "type" : "string",
+            "title" : "Url"
+          },
+          "state" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "codeVerifier" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "credentialConfigurationId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "credentialIssuerBaseUrl" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "nonceEndpoint" : {
+            "type" : "string",
+            "title" : "Url"
+          }
+        },
+        "required" : [ "authorizationUrl", "credentialConfigurationId", "credentialIssuerBaseUrl", "state" ],
+        "title" : "GenerateAuthorizationUrlResult"
+      },
+      "id.walt.wallet2.handlers.ExchangeCodeRequest" : {
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "credentialIssuerBaseUrl" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "codeVerifier" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "clientId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "redirectUri" : {
+            "type" : "string",
+            "title" : "Url"
+          },
+          "tokenRequestHeaders" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "LinkedHashMap<String,String>"
+          }
+        },
+        "required" : [ "clientId", "code", "credentialIssuerBaseUrl", "redirectUri", "tokenRequestHeaders" ],
+        "title" : "ExchangeCodeRequest"
+      },
+      "id.walt.wallet2.handlers.PollDeferredRequest" : {
+        "type" : "object",
+        "properties" : {
+          "deferredCredentialEndpoint" : {
+            "type" : "string",
+            "title" : "Url"
+          },
+          "transactionId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "accessToken" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "credentialIssuerBaseUrl" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "credentialConfigurationId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "metadata" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "label" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "keyId" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "accessToken", "deferredCredentialEndpoint", "transactionId" ],
+        "title" : "PollDeferredRequest"
+      },
+      "id.walt.wallet2.handlers.ReceiveAuthorizedCredentialRequest" : {
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "codeVerifier" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "credentialIssuer" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "credentialEndpoint" : {
+            "type" : "string",
+            "title" : "Url"
+          },
+          "credentialConfigurationId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "nonceEndpoint" : {
+            "type" : "string",
+            "title" : "Url"
+          },
+          "clientId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "redirectUri" : {
+            "type" : "string",
+            "title" : "Url"
+          },
+          "useDpop" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "key" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "keyId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "did" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "metadata" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "label" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "clientId", "code", "credentialConfigurationId", "credentialEndpoint", "credentialIssuer", "redirectUri", "useDpop" ],
+        "title" : "ReceiveAuthorizedCredentialRequest"
+      },
+      "id.walt.wallet2.handlers.PresentCredentialRequest" : {
+        "type" : "object",
+        "properties" : {
+          "requestUrl" : {
+            "type" : "string",
+            "title" : "Url"
+          },
+          "key" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "keyId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "did" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "runPolicies" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          }
+        },
+        "required" : [ "requestUrl" ],
+        "title" : "PresentCredentialRequest"
+      },
+      "id.waltid.openid4vp.wallet.WalletPresentFunctionality2.WalletPresentResult" : {
+        "type" : "object",
+        "properties" : {
+          "get_url" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "form_post_html" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "transmission_success" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "verifier_response" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonElement"
+          },
+          "redirect_to" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "title" : "WalletPresentFunctionality2.WalletPresentResult"
+      },
+      "id.walt.wallet2.handlers.PresentCredentialIsolatedRequest" : {
+        "type" : "object",
+        "properties" : {
+          "requestUrl" : {
+            "type" : "string",
+            "title" : "Url"
+          },
+          "credentials" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.wallet2.data.StoredCredential"
+            },
+            "title" : "ArrayList<StoredCredential>"
+          },
+          "key" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "keyId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "did" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "credentials", "requestUrl" ],
+        "title" : "PresentCredentialIsolatedRequest"
+      },
+      "id.walt.wallet2.handlers.ResolveVpRequestRequest" : {
+        "type" : "object",
+        "properties" : {
+          "requestUrl" : {
+            "type" : "string",
+            "title" : "Url"
+          }
+        },
+        "required" : [ "requestUrl" ],
+        "title" : "ResolveVpRequestRequest"
+      },
+      "id.walt.verifier.openid.models.authorization.AuthorizationRequest" : {
+        "type" : "object",
+        "properties" : {
+          "response_type" : {
+            "$ref" : "#/components/schemas/id.walt.verifier.openid.models.openid.OpenID4VPResponseType"
+          },
+          "client_id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "redirect_uri" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "scope" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "state" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "response_mode" : {
+            "$ref" : "#/components/schemas/id.walt.verifier.openid.models.openid.OpenID4VPResponseMode"
+          },
+          "nonce" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "request" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "request_uri" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "response_uri" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "dcql_query" : {
+            "$ref" : "#/components/schemas/id.walt.dcql.models.DcqlQuery"
+          },
+          "client_metadata" : {
+            "$ref" : "#/components/schemas/ClientMetadata"
+          },
+          "request_uri_method" : {
+            "$ref" : "#/components/schemas/id.walt.verifier.openid.models.authorization.RequestUriHttpMethod"
+          },
+          "transaction_data" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "verifier_info" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.verifier.openid.models.authorization.VerifierInfoItem"
+            },
+            "title" : "ArrayList<VerifierInfoItem>"
+          },
+          "id_token_type" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "wallet_nonce" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "expected_origins" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "iss" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "title" : "AuthorizationRequest"
+      },
+      "id.walt.verifier.openid.models.openid.OpenID4VPResponseType" : {
+        "type" : "string",
+        "enum" : [ "vp_token", "vp_token id_token", "code" ],
+        "title" : "OpenID4VPResponseType"
+      },
+      "id.walt.verifier.openid.models.openid.OpenID4VPResponseMode" : {
+        "type" : "string",
+        "enum" : [ "fragment", "query", "direct_post", "direct_post.jwt", "dc_api", "dc_api.jwt", "form_post" ],
+        "title" : "OpenID4VPResponseMode"
+      },
+      "id.walt.dcql.models.DcqlQuery" : {
+        "type" : "object",
+        "properties" : {
+          "credentials" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.dcql.models.CredentialQuery"
+            },
+            "title" : "ArrayList<CredentialQuery>"
+          },
+          "credential_sets" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.dcql.models.CredentialSetQuery"
+            },
+            "title" : "ArrayList<CredentialSetQuery>"
+          }
+        },
+        "required" : [ "credentials" ],
+        "title" : "DcqlQuery"
+      },
+      "id.walt.dcql.models.CredentialQuery" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "format" : {
+            "$ref" : "#/components/schemas/id.walt.dcql.models.CredentialFormat"
+          },
+          "multiple" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "meta" : {
+            "$ref" : "#/components/schemas/CredentialQueryMeta"
+          },
+          "trusted_authorities" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.dcql.models.TrustedAuthoritiesQuery"
+            },
+            "title" : "ArrayList<TrustedAuthoritiesQuery>"
+          },
+          "require_cryptographic_holder_binding" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "claims" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.dcql.models.ClaimsQuery"
+            },
+            "title" : "ArrayList<ClaimsQuery>"
+          },
+          "claim_sets" : {
+            "type" : "array",
+            "items" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string",
+                "title" : "String"
+              },
+              "title" : "ArrayList<String>"
+            },
+            "title" : "ArrayList<ArrayList<String>>"
+          }
+        },
+        "required" : [ "format", "id", "meta", "multiple", "require_cryptographic_holder_binding" ],
+        "title" : "CredentialQuery"
+      },
+      "id.walt.dcql.models.CredentialFormat" : {
+        "type" : "string",
+        "enum" : [ "jwt_vc_json", "ldp_vc", "mso_mdoc", "dc+sd-jwt", "ac_vp" ],
+        "title" : "CredentialFormat"
+      },
+      "CredentialQueryMeta" : {
+        "type" : "object",
+        "properties" : { },
+        "title" : "CredentialQueryMeta"
+      },
+      "id.walt.dcql.models.TrustedAuthoritiesQuery" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "$ref" : "#/components/schemas/id.walt.dcql.models.TrustedAuthorityType"
+          },
+          "values" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          }
+        },
+        "required" : [ "type", "values" ],
+        "title" : "TrustedAuthoritiesQuery"
+      },
+      "id.walt.dcql.models.TrustedAuthorityType" : {
+        "type" : "string",
+        "enum" : [ "aki", "etsi_tl", "openid_federation" ],
+        "title" : "TrustedAuthorityType"
+      },
+      "id.walt.dcql.models.ClaimsQuery" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "path" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonElement"
+            },
+            "title" : "ArrayList<JsonElement>"
+          },
+          "values" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "JsonPrimitive"
+            },
+            "title" : "ArrayList<JsonPrimitive>"
+          },
+          "intent_to_retain" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          }
+        },
+        "required" : [ "path" ],
+        "title" : "ClaimsQuery"
+      },
+      "id.walt.dcql.models.CredentialSetQuery" : {
+        "type" : "object",
+        "properties" : {
+          "options" : {
+            "type" : "array",
+            "items" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string",
+                "title" : "String"
+              },
+              "title" : "ArrayList<String>"
+            },
+            "title" : "ArrayList<ArrayList<String>>"
+          },
+          "required" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          }
+        },
+        "required" : [ "options", "required" ],
+        "title" : "CredentialSetQuery"
+      },
+      "ClientMetadata" : {
+        "type" : "object",
+        "properties" : {
+          "jwks" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "vp_formats_supported" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+            },
+            "title" : "LinkedHashMap<String,JsonObject>"
+          },
+          "encrypted_response_enc_values_supported" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "subject_syntax_types_supported" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "id_token_signed_response_alg" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "redirect_uris" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "client_name" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "logo_uri" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "tos_uri" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "policy_uri" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "client_uri" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "title" : "ClientMetadata"
+      },
+      "id.walt.verifier.openid.models.authorization.RequestUriHttpMethod" : {
+        "type" : "string",
+        "enum" : [ "get", "post" ],
+        "title" : "RequestUriHttpMethod"
+      },
+      "id.walt.verifier.openid.models.authorization.VerifierInfoItem" : {
+        "type" : "object",
+        "properties" : {
+          "format" : {
+            "$ref" : "#/components/schemas/id.walt.verifier.openid.models.credentials.AttestationFormat"
+          },
+          "data" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "credential_ids" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          }
+        },
+        "required" : [ "data", "format" ],
+        "title" : "VerifierInfoItem"
+      },
+      "id.walt.verifier.openid.models.credentials.AttestationFormat" : {
+        "type" : "string",
+        "enum" : [ "jwt", "registration_cert" ],
+        "title" : "AttestationFormat"
+      },
+      "id.walt.wallet2.handlers.ResolveVpRequestResult" : {
+        "type" : "object",
+        "properties" : {
+          "authorizationRequest" : {
+            "$ref" : "#/components/schemas/id.walt.verifier.openid.models.authorization.AuthorizationRequest"
+          },
+          "nonce" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "clientId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "responseUri" : {
+            "type" : "string",
+            "title" : "Url"
+          },
+          "hasRequestUri" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "dcqlQuery" : {
+            "$ref" : "#/components/schemas/id.walt.dcql.models.DcqlQuery"
+          }
+        },
+        "required" : [ "authorizationRequest", "hasRequestUri" ],
+        "title" : "ResolveVpRequestResult"
+      },
+      "id.walt.wallet2.handlers.MatchCredentialsRequest" : {
+        "type" : "object",
+        "properties" : {
+          "dcqlQuery" : {
+            "$ref" : "#/components/schemas/id.walt.dcql.models.DcqlQuery"
+          },
+          "credentials" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.wallet2.data.StoredCredential"
+            },
+            "title" : "ArrayList<StoredCredential>"
+          }
+        },
+        "required" : [ "credentials", "dcqlQuery" ],
+        "title" : "MatchCredentialsRequest"
+      },
+      "id.walt.wallet2.handlers.MatchCredentialsResult" : {
+        "type" : "object",
+        "properties" : {
+          "matchedQueryIds" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "matchCount" : {
+            "type" : "integer",
+            "format" : "int32",
+            "title" : "Int"
+          },
+          "matchedCredentialIds" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string",
+                "title" : "String"
+              },
+              "title" : "ArrayList<String>"
+            },
+            "title" : "LinkedHashMap<String,ArrayList<String>>"
+          }
+        },
+        "required" : [ "matchCount", "matchedCredentialIds", "matchedQueryIds" ],
+        "title" : "MatchCredentialsResult"
+      },
+      "id.walt.wallet2.handlers.MatchCredentialsFromStoreRequest" : {
+        "type" : "object",
+        "properties" : {
+          "dcqlQuery" : {
+            "$ref" : "#/components/schemas/id.walt.dcql.models.DcqlQuery"
+          }
+        },
+        "required" : [ "dcqlQuery" ],
+        "title" : "MatchCredentialsFromStoreRequest"
+      },
+      "id.walt.wallet2.handlers.PresentationCredentialSelection" : {
+        "type" : "object",
+        "properties" : {
+          "queryId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "credentialId" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "credentialId", "queryId" ],
+        "title" : "PresentationCredentialSelection"
+      },
+      "id.walt.wallet2.handlers.PresentationDisclosureSelection" : {
+        "type" : "object",
+        "properties" : {
+          "queryId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "credentialId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "path" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "credentialId", "path", "queryId" ],
+        "title" : "PresentationDisclosureSelection"
+      },
+      "id.walt.wallet2.handlers.BuildVpTokenRequest" : {
+        "type" : "object",
+        "properties" : {
+          "requestUrl" : {
+            "type" : "string",
+            "title" : "Url"
+          },
+          "selectedCredentialOptions" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.wallet2.handlers.PresentationCredentialSelection"
+            },
+            "title" : "ArrayList<PresentationCredentialSelection>"
+          },
+          "selectedDisclosureOptions" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.wallet2.handlers.PresentationDisclosureSelection"
+            },
+            "title" : "ArrayList<PresentationDisclosureSelection>"
+          },
+          "selectedCredentialIds" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string",
+                "title" : "String"
+              },
+              "title" : "ArrayList<String>"
+            },
+            "title" : "LinkedHashMap<String,ArrayList<String>>"
+          },
+          "key" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "keyId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "did" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "requestUrl", "selectedCredentialIds", "selectedCredentialOptions" ],
+        "title" : "BuildVpTokenRequest"
+      },
+      "id.walt.wallet2.handlers.BuildVpTokenResult" : {
+        "type" : "object",
+        "properties" : {
+          "vpToken" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "idToken" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "vpToken" ],
+        "title" : "BuildVpTokenResult"
+      },
+      "id.walt.wallet2.handlers.SendAuthorizationResponseRequest" : {
+        "type" : "object",
+        "properties" : {
+          "requestUrl" : {
+            "type" : "string",
+            "title" : "Url"
+          },
+          "vpToken" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "idToken" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "requestUrl", "vpToken" ],
+        "title" : "SendAuthorizationResponseRequest"
+      },
+      "id.walt.wallet2.handlers.PreviewPresentationRequest" : {
+        "type" : "object",
+        "properties" : {
+          "requestUrl" : {
+            "type" : "string",
+            "title" : "Url"
+          },
+          "key" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "keyId" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "requestUrl" ],
+        "title" : "PreviewPresentationRequest"
+      },
+      "id.walt.wallet2.server.models.PreviewVerifierMetadata" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "locale" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "logoUri" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "clientUri" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "policyUri" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "termsOfServiceUri" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "title" : "PreviewVerifierMetadata"
+      },
+      "id.walt.wallet2.server.models.PreviewResponseEncryption" : {
+        "type" : "object",
+        "properties" : {
+          "required" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "keyManagementAlgorithm" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "contentEncryptionAlgorithm" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "verifierKeyId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "verifierKeyThumbprint" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "required" ],
+        "title" : "PreviewResponseEncryption"
+      },
+      "id.walt.wallet2.server.models.PreviewTransactionDataItem" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "credentialQueryIds" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "rawJson" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "details" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          }
+        },
+        "required" : [ "credentialQueryIds", "details", "rawJson", "type" ],
+        "title" : "PreviewTransactionDataItem"
+      },
+      "id.walt.wallet2.server.models.PreviewCredentialOption" : {
+        "type" : "object",
+        "properties" : {
+          "queryId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "credentialId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "multiple" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "format" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "issuer" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "subject" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "label" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "credentialData" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "disclosures" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.wallet2.server.models.PreviewCredentialDisclosure"
+            },
+            "title" : "ArrayList<PreviewCredentialDisclosure>"
+          }
+        },
+        "required" : [ "credentialData", "credentialId", "disclosures", "format", "multiple", "queryId" ],
+        "title" : "PreviewCredentialOption"
+      },
+      "id.walt.wallet2.server.models.PreviewCredentialDisclosure" : {
+        "type" : "object",
+        "properties" : {
+          "path" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "name" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "value" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonElement"
+          },
+          "selectivelyDisclosable" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "required" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "selectable" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          }
+        },
+        "required" : [ "path", "required", "selectable", "selectivelyDisclosable", "value" ],
+        "title" : "PreviewCredentialDisclosure"
+      },
+      "id.walt.wallet2.server.models.PreviewCredentialRequirement" : {
+        "type" : "object",
+        "properties" : {
+          "options" : {
+            "type" : "array",
+            "items" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string",
+                "title" : "String"
+              },
+              "title" : "ArrayList<String>"
+            },
+            "title" : "ArrayList<ArrayList<String>>"
+          }
+        },
+        "required" : [ "options" ],
+        "title" : "PreviewCredentialRequirement"
+      },
+      "id.walt.wallet2.server.models.PreviewError" : {
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "message" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "code" ],
+        "title" : "PreviewError"
+      },
+      "id.walt.wallet2.server.models.PresentationPreviewResponse" : {
+        "type" : "object",
+        "properties" : {
+          "authorizationRequest" : {
+            "$ref" : "#/components/schemas/id.walt.verifier.openid.models.authorization.AuthorizationRequest"
+          },
+          "valid" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "keyId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "clientId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "verifier" : {
+            "$ref" : "#/components/schemas/id.walt.wallet2.server.models.PreviewVerifierMetadata"
+          },
+          "responseUri" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "state" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "nonce" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "responseEncryption" : {
+            "$ref" : "#/components/schemas/id.walt.wallet2.server.models.PreviewResponseEncryption"
+          },
+          "transactionData" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.wallet2.server.models.PreviewTransactionDataItem"
+            },
+            "title" : "ArrayList<PreviewTransactionDataItem>"
+          },
+          "credentialOptions" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.wallet2.server.models.PreviewCredentialOption"
+            },
+            "title" : "ArrayList<PreviewCredentialOption>"
+          },
+          "credentialRequirements" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.wallet2.server.models.PreviewCredentialRequirement"
+            },
+            "title" : "ArrayList<PreviewCredentialRequirement>"
+          },
+          "error" : {
+            "$ref" : "#/components/schemas/id.walt.wallet2.server.models.PreviewError"
+          }
+        },
+        "required" : [ "authorizationRequest", "credentialOptions", "credentialRequirements", "transactionData", "valid" ],
+        "title" : "PresentationPreviewResponse"
+      },
+      "id.walt.wallet2.handlers.RejectPresentationByRequestUrlRequest" : {
+        "type" : "object",
+        "properties" : {
+          "requestUrl" : {
+            "type" : "string",
+            "title" : "Url"
+          },
+          "errorCode" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "errorDescription" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "requestUrl" ],
+        "title" : "RejectPresentationByRequestUrlRequest"
+      }
+    },
+    "examples" : { }
+  },
+  "webhooks" : { }
+}

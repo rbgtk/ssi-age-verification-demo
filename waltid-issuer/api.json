@@ -1,0 +1,3131 @@
+{
+  "openapi" : "3.1.0",
+  "info" : {
+    "title" : "walt.id issuer2",
+    "description" : "Interact with the walt.id issuer2. Version is reported to be 1.1.1 and this service instance was started 2026-10-03T13:45:47Z.<br/>Questions about anything here? Visit <a href='https://walt.id/community'>support</a>.<br/>",
+    "contact" : {
+      "name" : "walt.id",
+      "url" : "https://walt.id",
+      "email" : "office@walt.id"
+    },
+    "license" : {
+      "name" : "Apache 2.0",
+      "url" : "https://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version" : "1.1.1"
+  },
+  "externalDocs" : {
+    "description" : "docs.walt.id",
+    "url" : "https://docs.walt.id"
+  },
+  "servers" : [ {
+    "url" : "/",
+    "description" : "Development Server"
+  } ],
+  "tags" : [ ],
+  "paths" : {
+    "/features/registered" : {
+      "get" : {
+        "tags" : [ "Feature management" ],
+        "summary" : "List registered features",
+        "description" : "Lists every feature flag registered by this service instance, regardless of its current state.\nThe response is an object whose keys are stable feature identifiers and whose values are\nhuman-readable descriptions. Use it to discover valid identifiers before changing\n`enabledFeatures` or `disabledFeatures` in feature configuration.\n\nThis endpoint is intentionally public and requires no authentication. It exposes feature names\nand descriptions, but never feature configuration values or secrets. Feature descriptions must\ntherefore not contain sensitive information.",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "All feature identifiers registered by this service and their descriptions",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "additionalProperties" : {
+                    "type" : "string",
+                    "title" : "String"
+                  },
+                  "title" : "LinkedHashMap<String,String>"
+                },
+                "examples" : {
+                  "Registered feature catalog" : {
+                    "value" : {
+                      "web" : "Web service",
+                      "openapi" : "Enables openapi endpoints",
+                      "persistence" : "Storage"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/features/state" : {
+      "get" : {
+        "tags" : [ "Feature management" ],
+        "summary" : "Show feature states",
+        "description" : "Shows how every registered feature is resolved at runtime. The three buckets are mutually\nexclusive:\n\n- `enabled`: features successfully enabled during startup. This includes base features,\n  explicitly enabled features, and features whose declared default is enabled.\n- `disabled`: features explicitly listed in `disabledFeatures` configuration.\n- `defaultedDisabled`: features that were not explicitly configured and whose declared default\n  is disabled.\n\nEach bucket contains `features`, a map from stable feature identifiers to human-readable\ndescriptions, and `total`, the number of entries in that map. There is intentionally no\n`defaultedEnabled` bucket: default-enabled features are activated during startup and reported\nunder `enabled`.\n\nThis endpoint is intentionally public and requires no authentication. It is intended for\ndiagnostics and exposes the service's feature posture, so deployments should account for that\noperational metadata exposure. It does not expose configuration values or secrets and must not\nbe used as an authorization decision point.",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "Runtime state of every registered feature",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.commons.web.modules.FeatureFlagInformationModule.FeatureFlagInformations"
+                },
+                "examples" : {
+                  "Feature state buckets" : {
+                    "value" : {
+                      "enabled" : {
+                        "features" : {
+                          "web" : "Web service",
+                          "openapi" : "Enables openapi endpoints"
+                        },
+                        "total" : 2
+                      },
+                      "disabled" : {
+                        "features" : {
+                          "debug-endpoints" : "Enables various debug endpoints"
+                        },
+                        "total" : 1
+                      },
+                      "defaultedDisabled" : {
+                        "features" : {
+                          "persistence" : "Storage"
+                        },
+                        "total" : 1
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/livez" : {
+      "get" : {
+        "tags" : [ ],
+        "parameters" : [ ],
+        "responses" : { },
+        "deprecated" : false
+      }
+    },
+    "/(static-content)/static/credential-cards/{...}" : {
+      "get" : {
+        "tags" : [ ],
+        "parameters" : [ ],
+        "responses" : { },
+        "deprecated" : false
+      }
+    },
+    "/issuer2/profiles" : {
+      "get" : {
+        "tags" : [ "Issuer Service API v2 - Credential Issuance" ],
+        "summary" : "List credential profiles",
+        "description" : "List credential profiles loaded from issuer2-profiles.conf.\n\nProfiles are deployment templates used by credential-offer creation. Use the\nreturned profileId in POST /issuer2/credential-offers. Runtime overrides may\nprovide credential data, mappings, selective disclosure, mDoc namespace data\nmappings, authorized transaction data types, ID token claim mappings, x5 chains,\nand webhook URLs for a single issuance session.",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "Configured credential profiles",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/id.walt.issuer2.domain.CredentialProfile"
+                  },
+                  "title" : "ArrayList<CredentialProfile>"
+                },
+                "examples" : {
+                  "Configured W3C, SD-JWT VC, and mDoc profiles" : {
+                    "value" : [ {
+                      "profileId" : "openBadgeCredential",
+                      "name" : "OpenBadgeCredential",
+                      "credentialConfigurationId" : "OpenBadgeCredential_jwt_vc_json",
+                      "issuerKey" : {
+                        "type" : "jwk",
+                        "jwk" : {
+                          "d" : "KJ4k3Vcl5Sj9Mfq4rrNXBm2MoPoY3_Ak_PIR_EgsFhQ",
+                          "crv" : "P-256",
+                          "x" : "G0RINBiF-oQUD3d5DGnegQuXenI29JDaMGoMvioKRBM",
+                          "y" : "ed3eFGs2pEtrp7vAZ7BLcbrUtpKkYWAT2JPUQK4lN4E",
+                          "kty" : "EC"
+                        }
+                      },
+                      "issuerDid" : "did:jwk:eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6IkcwUklOQmlGLW9RVUQzZDVER25lZ1F1WGVuSTI5SkRhTUdvTXZpb0tSQk0iLCJ5IjoiZWQzZUZHczJwRXRycDd2QVo3QkxjYnJVdHBLa1lXQVQySlBVUUs0bE40RSJ9",
+                      "credentialData" : {
+                        "credentialSubject" : {
+                          "achievement" : {
+                            "description" : "This badge recognizes the development of the capacity to collaborate within a group environment.",
+                            "name" : "Teamwork",
+                            "type" : [ "Achievement" ],
+                            "criteria" : {
+                              "narrative" : "Team members are nominated for this badge by their peers and recognized upon review by Example Corp management."
+                            },
+                            "id" : "https://example.com/achievements/21st-century-skills/teamwork"
+                          },
+                          "type" : [ "AchievementSubject" ],
+                          "id" : "THIS WILL BE REPLACED WITH DYNAMIC DATA FUNCTION"
+                        },
+                        "type" : [ "VerifiableCredential", "OpenBadgeCredential" ],
+                        "credentialSchema" : [ {
+                          "type" : "1EdTechJsonSchemaValidator2019",
+                          "id" : "https://purl.imsglobal.org/spec/ob/v3p0/schema/json/ob_v3p0_achievementcredential_schema.json"
+                        } ],
+                        "issuer" : {
+                          "name" : "Jobs for the Future (JFF)",
+                          "type" : [ "Profile" ],
+                          "image" : "https://w3c-ccg.github.io/vc-ed/plugfest-1-2022/images/JFF_LogoLockup.png",
+                          "url" : "https://www.jff.org/",
+                          "id" : "THIS WILL BE REPLACED WITH DYNAMIC DATA FUNCTION"
+                        },
+                        "@context" : [ "https://www.w3.org/ns/credentials/v2", "https://purl.imsglobal.org/spec/ob/v3p0/context-3.0.3.json", "https://purl.imsglobal.org/spec/ob/v3p0/extensions.json" ],
+                        "name" : "Example University Degree",
+                        "id" : "THIS WILL BE REPLACED WITH DYNAMIC DATA FUNCTION",
+                        "validFrom" : "THIS WILL BE REPLACED WITH DYNAMIC DATA FUNCTION"
+                      },
+                      "mapping" : {
+                        "credentialSubject" : {
+                          "id" : "<subjectDid>"
+                        },
+                        "id" : "<uuid>",
+                        "issuer" : {
+                          "id" : "<issuerDid>"
+                        },
+                        "validFrom" : "<timestamp>"
+                      }
+                    }, {
+                      "profileId" : "identityCredentialSdJwt",
+                      "name" : "Identity Credential",
+                      "credentialConfigurationId" : "identity_credential",
+                      "issuerKey" : {
+                        "type" : "jwk",
+                        "jwk" : {
+                          "d" : "KJ4k3Vcl5Sj9Mfq4rrNXBm2MoPoY3_Ak_PIR_EgsFhQ",
+                          "crv" : "P-256",
+                          "x" : "G0RINBiF-oQUD3d5DGnegQuXenI29JDaMGoMvioKRBM",
+                          "y" : "ed3eFGs2pEtrp7vAZ7BLcbrUtpKkYWAT2JPUQK4lN4E",
+                          "kty" : "EC"
+                        }
+                      },
+                      "issuerDid" : "did:jwk:eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6IkcwUklOQmlGLW9RVUQzZDVER25lZ1F1WGVuSTI5SkRhTUdvTXZpb0tSQk0iLCJ5IjoiZWQzZUZHczJwRXRycDd2QVo3QkxjYnJVdHBLa1lXQVQySlBVUUs0bE40RSJ9",
+                      "credentialData" : {
+                        "address" : {
+                          "region" : "Anystate",
+                          "street_address" : "123 Main St",
+                          "country" : "US",
+                          "locality" : "Anytown"
+                        },
+                        "is_over_18" : true,
+                        "phone_number" : "+1-202-555-0101",
+                        "given_name" : "John",
+                        "family_name" : "Doe",
+                        "is_over_21" : true,
+                        "is_over_65" : true,
+                        "email" : "johndoe@example.com",
+                        "birthdate" : "1940-01-01"
+                      },
+                      "mapping" : {
+                        "exp" : "<timestamp-in-seconds:365d>",
+                        "nbf" : "<timestamp-seconds>",
+                        "id" : "<uuid>",
+                        "iat" : "<timestamp-seconds>"
+                      },
+                      "selectiveDisclosure" : {
+                        "fields" : {
+                          "birthdate" : {
+                            "sd" : true
+                          },
+                          "family_name" : {
+                            "sd" : false
+                          }
+                        }
+                      },
+                      "idTokenClaimsMapping" : {
+                        "$.given_name" : "$.given_name",
+                        "$.family_name" : "$.family_name"
+                      }
+                    }, {
+                      "profileId" : "isoPhotoId",
+                      "name" : "ISO Photo ID",
+                      "credentialConfigurationId" : "org.iso.23220.photoid.1",
+                      "issuerKey" : {
+                        "type" : "jwk",
+                        "jwk" : {
+                          "d" : "KJ4k3Vcl5Sj9Mfq4rrNXBm2MoPoY3_Ak_PIR_EgsFhQ",
+                          "crv" : "P-256",
+                          "x" : "G0RINBiF-oQUD3d5DGnegQuXenI29JDaMGoMvioKRBM",
+                          "y" : "ed3eFGs2pEtrp7vAZ7BLcbrUtpKkYWAT2JPUQK4lN4E",
+                          "kty" : "EC"
+                        }
+                      },
+                      "credentialData" : {
+                        "org.iso.23220.dtc.1" : {
+                          "dg16" : null,
+                          "dg14" : null,
+                          "sod" : null,
+                          "dg15" : null,
+                          "dg12" : null,
+                          "dg13" : null,
+                          "dg10" : null,
+                          "version" : null,
+                          "dg11" : null,
+                          "dg2" : null,
+                          "dg1" : null,
+                          "dg4" : null,
+                          "dg3" : null,
+                          "dg6" : null,
+                          "dg5" : null,
+                          "dg8" : null,
+                          "dg7" : null,
+                          "dg9" : null
+                        },
+                        "org.iso.23220.1" : {
+                          "resident_city" : "Sample City",
+                          "issue_date" : "2024-03-15",
+                          "age_over_51" : null,
+                          "age_over_50" : null,
+                          "birth_date" : "1974-03-15",
+                          "age_over_59" : null,
+                          "portrait_capture_date" : "2020-03-14T12:00:00Z",
+                          "age_over_58" : null,
+                          "age_over_57" : null,
+                          "age_over_56" : null,
+                          "age_over_55" : null,
+                          "age_over_54" : null,
+                          "age_over_53" : null,
+                          "age_over_52" : null,
+                          "age_birth_year" : 1971,
+                          "age_over_49" : null,
+                          "age_over_27" : true,
+                          "age_over_28" : true,
+                          "age_over_21" : true,
+                          "age_over_23" : true,
+                          "age_over_25" : true,
+                          "age_over_48" : null,
+                          "age_over_47" : null,
+                          "resident_address" : "Sample Street 123, 12345 Sample City, Sample State, Utopia",
+                          "age_over_46" : null,
+                          "age_over_45" : null,
+                          "age_over_44" : null,
+                          "age_over_43" : null,
+                          "age_over_42" : null,
+                          "age_over_41" : null,
+                          "age_over_16" : true,
+                          "age_over_18" : true,
+                          "age_over_73" : null,
+                          "age_over_72" : null,
+                          "age_over_71" : null,
+                          "age_over_70" : null,
+                          "name_at_birth" : null,
+                          "age_over_13" : true,
+                          "expiry_date" : "2028-09-01",
+                          "age_over_15" : true,
+                          "age_over_79" : null,
+                          "age_over_78" : null,
+                          "resident_country" : "ZZ",
+                          "age_over_77" : null,
+                          "age_over_76" : null,
+                          "age_over_75" : null,
+                          "age_over_74" : null,
+                          "sex" : 2,
+                          "age_over_62" : null,
+                          "age_over_61" : null,
+                          "nationality" : "ZZ",
+                          "age_over_69" : null,
+                          "resident_city_latin1" : null,
+                          "age_over_68" : null,
+                          "given_name_latin1" : null,
+                          "age_over_66" : null,
+                          "age_over_64" : null,
+                          "age_over_63" : null,
+                          "age_over_19" : null,
+                          "age_over_17" : null,
+                          "issuing_subdivision" : "State of Utopia",
+                          "document_number" : "987654321",
+                          "age_over_95" : null,
+                          "age_over_94" : null,
+                          "age_over_93" : null,
+                          "age_over_92" : null,
+                          "age_over_91" : null,
+                          "age_over_90" : null,
+                          "age_over_14" : null,
+                          "age_over_12" : null,
+                          "age_over_11" : null,
+                          "age_over_99" : null,
+                          "age_over_10" : null,
+                          "age_over_98" : null,
+                          "age_over_97" : null,
+                          "age_over_96" : null,
+                          "given_name_viz" : "Erika",
+                          "age_over_09" : null,
+                          "age_over_08" : null,
+                          "age_over_07" : null,
+                          "issuing_country" : "AT",
+                          "age_over_06" : null,
+                          "age_over_60" : false,
+                          "age_over_05" : null,
+                          "age_over_65" : false,
+                          "age_over_67" : false,
+                          "age_over_84" : null,
+                          "age_over_83" : null,
+                          "age_over_82" : null,
+                          "age_over_81" : null,
+                          "resident_postal_code" : "12345",
+                          "age_over_80" : null,
+                          "age_over_04" : null,
+                          "age_over_03" : null,
+                          "age_in_years" : 54,
+                          "age_over_02" : null,
+                          "age_over_01" : null,
+                          "age_over_89" : null,
+                          "age_over_88" : null,
+                          "age_over_87" : null,
+                          "family_name" : "Mustermann",
+                          "age_over_86" : null,
+                          "age_over_85" : null,
+                          "family_name_viz" : "Mustermann",
+                          "age_over_39" : null,
+                          "age_over_38" : null,
+                          "age_over_37" : null,
+                          "family_name_latin1" : null,
+                          "age_over_36" : null,
+                          "age_over_35" : null,
+                          "age_over_34" : null,
+                          "age_over_33" : null,
+                          "age_over_32" : null,
+                          "age_over_31" : null,
+                          "age_over_30" : null,
+                          "age_over_29" : null,
+                          "birthplace" : "Sample City",
+                          "portrait" : null,
+                          "issuing_authority_unicode" : "Utopia Central Registry",
+                          "age_over_26" : null,
+                          "age_over_24" : null,
+                          "age_over_22" : null,
+                          "age_over_20" : null,
+                          "age_over_40" : true,
+                          "given_name" : "Erika"
+                        },
+                        "org.iso.23220.photoid.1" : {
+                          "travel_document_number" : null,
+                          "resident_house_number" : "123",
+                          "birth_city" : null,
+                          "person_id" : "24601",
+                          "resident_street" : "Sample Street",
+                          "birth_state" : null,
+                          "travel_document_type" : null,
+                          "travel_document_mrz" : null,
+                          "administrative_number" : "123456789",
+                          "birth_country" : null,
+                          "resident_state" : "Sample State"
+                        }
+                      },
+                      "idTokenClaimsMapping" : {
+                        "$.family_name" : "$.['org.iso.23220.1'].family_name",
+                        "$.given_name" : "$.['org.iso.23220.1'].given_name"
+                      },
+                      "mDocNameSpacesDataMappingConfig" : {
+                        "org.iso.23220.1" : {
+                          "entriesConfigMap" : {
+                            "portrait_capture_date" : {
+                              "type" : "string",
+                              "conversionType" : "stringToTDate"
+                            },
+                            "issue_date" : {
+                              "type" : "string",
+                              "conversionType" : "stringToFullDate"
+                            },
+                            "birth_date" : {
+                              "type" : "string",
+                              "conversionType" : "stringToFullDate"
+                            },
+                            "expiry_date" : {
+                              "type" : "string",
+                              "conversionType" : "stringToFullDate"
+                            }
+                          }
+                        }
+                      },
+                      "x5Chain" : [ "-----BEGIN CERTIFICATE-----\nMIICmDCCAj+gAwIBAgIQI49pU93pQh25TilZqbfBATAKBggqhkjOPQQDAjBiMQsw\nCQYDVQQGEwJBVDEQMA4GA1UECgwHd2FsdC5pZDEZMBcGA1UECwwQSXNzdWVyMiBU\nZXN0IFBLSTEmMCQGA1UEAwwdd2FsdC5pZCBPU1MgSXNzdWVyMiBUZXN0IElBQ0Ew\nHhcNMjYwODA2MDkzNzI1WhcNMjcwODA2MDkzNzI1WjBgMQswCQYDVQQGEwJBVDEQ\nMA4GA1UECgwHd2FsdC5pZDEZMBcGA1UECwwQSXNzdWVyMiBUZXN0IFBLSTEkMCIG\nA1UEAwwbT1NTIElzc3VlcjIgRG9jdW1lbnQgU2lnbmVyMFkwEwYHKoZIzj0CAQYI\nKoZIzj0DAQcDQgAEG0RINBiF+oQUD3d5DGnegQuXenI29JDaMGoMvioKRBN53d4U\nazakS2unu8BnsEtxutS2kqRhYBPYk9RAriU3gaOB2DCB1TAMBgNVHRMBAf8EAjAA\nMA4GA1UdDwEB/wQEAwIHgDAVBgNVHSUBAf8ECzAJBgcogYxdBQECMB0GA1UdDgQW\nBBS5uwPge8/AkJhc5xPe+k1acwcF2jAfBgNVHSMEGDAWgBRq4EfE0jIj+EyoK1iz\nl6VyqQkPNTApBgNVHRIEIjAghh5odHRwczovL2lzc3Vlci5leGFtcGxlL2F0L2lh\nY2EwMwYDVR0fBCwwKjAooCagJIYiaHR0cHM6Ly9pc3N1ZXIuZXhhbXBsZS9hdC9p\nYWNhLmNybDAKBggqhkjOPQQDAgNHADBEAiALoKeo5Laopv9yxJZVmqczHL42e7DN\nfXEvjKXTSRJ2tQIgIiMdWS5D7o4hbCU2EqVR8YbD/ycpPx9yvMpQkCu7TLQ=\n-----END CERTIFICATE-----" ]
+                    } ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/issuer2/profiles/{profileId}" : {
+      "get" : {
+        "tags" : [ "Issuer Service API v2 - Credential Issuance" ],
+        "summary" : "Get credential profile",
+        "description" : "Get one credential profile by profile ID.\n\nThe response is the exact profile loaded from issuer2-profiles.conf, including\nissuer key material for this first OSS issuer2 version.",
+        "parameters" : [ {
+          "name" : "profileId",
+          "in" : "path",
+          "description" : "Credential profile ID from GET /issuer2/profiles",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "example" : "openBadgeCredential"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Credential profile",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.issuer2.domain.CredentialProfile"
+                },
+                "examples" : {
+                  "openBadgeCredential profile" : {
+                    "value" : {
+                      "profileId" : "openBadgeCredential",
+                      "name" : "OpenBadgeCredential",
+                      "credentialConfigurationId" : "OpenBadgeCredential_jwt_vc_json",
+                      "issuerKey" : {
+                        "type" : "jwk",
+                        "jwk" : {
+                          "d" : "KJ4k3Vcl5Sj9Mfq4rrNXBm2MoPoY3_Ak_PIR_EgsFhQ",
+                          "crv" : "P-256",
+                          "x" : "G0RINBiF-oQUD3d5DGnegQuXenI29JDaMGoMvioKRBM",
+                          "y" : "ed3eFGs2pEtrp7vAZ7BLcbrUtpKkYWAT2JPUQK4lN4E",
+                          "kty" : "EC"
+                        }
+                      },
+                      "issuerDid" : "did:jwk:eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6IkcwUklOQmlGLW9RVUQzZDVER25lZ1F1WGVuSTI5SkRhTUdvTXZpb0tSQk0iLCJ5IjoiZWQzZUZHczJwRXRycDd2QVo3QkxjYnJVdHBLa1lXQVQySlBVUUs0bE40RSJ9",
+                      "credentialData" : {
+                        "credentialSubject" : {
+                          "achievement" : {
+                            "description" : "This badge recognizes the development of the capacity to collaborate within a group environment.",
+                            "name" : "Teamwork",
+                            "type" : [ "Achievement" ],
+                            "criteria" : {
+                              "narrative" : "Team members are nominated for this badge by their peers and recognized upon review by Example Corp management."
+                            },
+                            "id" : "https://example.com/achievements/21st-century-skills/teamwork"
+                          },
+                          "type" : [ "AchievementSubject" ],
+                          "id" : "THIS WILL BE REPLACED WITH DYNAMIC DATA FUNCTION"
+                        },
+                        "type" : [ "VerifiableCredential", "OpenBadgeCredential" ],
+                        "credentialSchema" : [ {
+                          "type" : "1EdTechJsonSchemaValidator2019",
+                          "id" : "https://purl.imsglobal.org/spec/ob/v3p0/schema/json/ob_v3p0_achievementcredential_schema.json"
+                        } ],
+                        "issuer" : {
+                          "name" : "Jobs for the Future (JFF)",
+                          "type" : [ "Profile" ],
+                          "image" : "https://w3c-ccg.github.io/vc-ed/plugfest-1-2022/images/JFF_LogoLockup.png",
+                          "url" : "https://www.jff.org/",
+                          "id" : "THIS WILL BE REPLACED WITH DYNAMIC DATA FUNCTION"
+                        },
+                        "@context" : [ "https://www.w3.org/ns/credentials/v2", "https://purl.imsglobal.org/spec/ob/v3p0/context-3.0.3.json", "https://purl.imsglobal.org/spec/ob/v3p0/extensions.json" ],
+                        "name" : "Example University Degree",
+                        "id" : "THIS WILL BE REPLACED WITH DYNAMIC DATA FUNCTION",
+                        "validFrom" : "THIS WILL BE REPLACED WITH DYNAMIC DATA FUNCTION"
+                      },
+                      "mapping" : {
+                        "credentialSubject" : {
+                          "id" : "<subjectDid>"
+                        },
+                        "id" : "<uuid>",
+                        "issuer" : {
+                          "id" : "<issuerDid>"
+                        },
+                        "validFrom" : "<timestamp>"
+                      }
+                    }
+                  },
+                  "identityCredentialSdJwt profile" : {
+                    "value" : {
+                      "profileId" : "identityCredentialSdJwt",
+                      "name" : "Identity Credential",
+                      "credentialConfigurationId" : "identity_credential",
+                      "issuerKey" : {
+                        "type" : "jwk",
+                        "jwk" : {
+                          "d" : "KJ4k3Vcl5Sj9Mfq4rrNXBm2MoPoY3_Ak_PIR_EgsFhQ",
+                          "crv" : "P-256",
+                          "x" : "G0RINBiF-oQUD3d5DGnegQuXenI29JDaMGoMvioKRBM",
+                          "y" : "ed3eFGs2pEtrp7vAZ7BLcbrUtpKkYWAT2JPUQK4lN4E",
+                          "kty" : "EC"
+                        }
+                      },
+                      "issuerDid" : "did:jwk:eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6IkcwUklOQmlGLW9RVUQzZDVER25lZ1F1WGVuSTI5SkRhTUdvTXZpb0tSQk0iLCJ5IjoiZWQzZUZHczJwRXRycDd2QVo3QkxjYnJVdHBLa1lXQVQySlBVUUs0bE40RSJ9",
+                      "credentialData" : {
+                        "address" : {
+                          "region" : "Anystate",
+                          "street_address" : "123 Main St",
+                          "country" : "US",
+                          "locality" : "Anytown"
+                        },
+                        "is_over_18" : true,
+                        "phone_number" : "+1-202-555-0101",
+                        "given_name" : "John",
+                        "family_name" : "Doe",
+                        "is_over_21" : true,
+                        "is_over_65" : true,
+                        "email" : "johndoe@example.com",
+                        "birthdate" : "1940-01-01"
+                      },
+                      "mapping" : {
+                        "exp" : "<timestamp-in-seconds:365d>",
+                        "nbf" : "<timestamp-seconds>",
+                        "id" : "<uuid>",
+                        "iat" : "<timestamp-seconds>"
+                      },
+                      "selectiveDisclosure" : {
+                        "fields" : {
+                          "birthdate" : {
+                            "sd" : true
+                          },
+                          "family_name" : {
+                            "sd" : false
+                          }
+                        }
+                      },
+                      "idTokenClaimsMapping" : {
+                        "$.given_name" : "$.given_name",
+                        "$.family_name" : "$.family_name"
+                      }
+                    }
+                  },
+                  "isoPhotoId profile" : {
+                    "value" : {
+                      "profileId" : "isoPhotoId",
+                      "name" : "ISO Photo ID",
+                      "credentialConfigurationId" : "org.iso.23220.photoid.1",
+                      "issuerKey" : {
+                        "type" : "jwk",
+                        "jwk" : {
+                          "d" : "KJ4k3Vcl5Sj9Mfq4rrNXBm2MoPoY3_Ak_PIR_EgsFhQ",
+                          "crv" : "P-256",
+                          "x" : "G0RINBiF-oQUD3d5DGnegQuXenI29JDaMGoMvioKRBM",
+                          "y" : "ed3eFGs2pEtrp7vAZ7BLcbrUtpKkYWAT2JPUQK4lN4E",
+                          "kty" : "EC"
+                        }
+                      },
+                      "credentialData" : {
+                        "org.iso.23220.dtc.1" : {
+                          "dg16" : null,
+                          "dg14" : null,
+                          "sod" : null,
+                          "dg15" : null,
+                          "dg12" : null,
+                          "dg13" : null,
+                          "dg10" : null,
+                          "version" : null,
+                          "dg11" : null,
+                          "dg2" : null,
+                          "dg1" : null,
+                          "dg4" : null,
+                          "dg3" : null,
+                          "dg6" : null,
+                          "dg5" : null,
+                          "dg8" : null,
+                          "dg7" : null,
+                          "dg9" : null
+                        },
+                        "org.iso.23220.1" : {
+                          "resident_city" : "Sample City",
+                          "issue_date" : "2024-03-15",
+                          "age_over_51" : null,
+                          "age_over_50" : null,
+                          "birth_date" : "1974-03-15",
+                          "age_over_59" : null,
+                          "portrait_capture_date" : "2020-03-14T12:00:00Z",
+                          "age_over_58" : null,
+                          "age_over_57" : null,
+                          "age_over_56" : null,
+                          "age_over_55" : null,
+                          "age_over_54" : null,
+                          "age_over_53" : null,
+                          "age_over_52" : null,
+                          "age_birth_year" : 1971,
+                          "age_over_49" : null,
+                          "age_over_27" : true,
+                          "age_over_28" : true,
+                          "age_over_21" : true,
+                          "age_over_23" : true,
+                          "age_over_25" : true,
+                          "age_over_48" : null,
+                          "age_over_47" : null,
+                          "resident_address" : "Sample Street 123, 12345 Sample City, Sample State, Utopia",
+                          "age_over_46" : null,
+                          "age_over_45" : null,
+                          "age_over_44" : null,
+                          "age_over_43" : null,
+                          "age_over_42" : null,
+                          "age_over_41" : null,
+                          "age_over_16" : true,
+                          "age_over_18" : true,
+                          "age_over_73" : null,
+                          "age_over_72" : null,
+                          "age_over_71" : null,
+                          "age_over_70" : null,
+                          "name_at_birth" : null,
+                          "age_over_13" : true,
+                          "expiry_date" : "2028-09-01",
+                          "age_over_15" : true,
+                          "age_over_79" : null,
+                          "age_over_78" : null,
+                          "resident_country" : "ZZ",
+                          "age_over_77" : null,
+                          "age_over_76" : null,
+                          "age_over_75" : null,
+                          "age_over_74" : null,
+                          "sex" : 2,
+                          "age_over_62" : null,
+                          "age_over_61" : null,
+                          "nationality" : "ZZ",
+                          "age_over_69" : null,
+                          "resident_city_latin1" : null,
+                          "age_over_68" : null,
+                          "given_name_latin1" : null,
+                          "age_over_66" : null,
+                          "age_over_64" : null,
+                          "age_over_63" : null,
+                          "age_over_19" : null,
+                          "age_over_17" : null,
+                          "issuing_subdivision" : "State of Utopia",
+                          "document_number" : "987654321",
+                          "age_over_95" : null,
+                          "age_over_94" : null,
+                          "age_over_93" : null,
+                          "age_over_92" : null,
+                          "age_over_91" : null,
+                          "age_over_90" : null,
+                          "age_over_14" : null,
+                          "age_over_12" : null,
+                          "age_over_11" : null,
+                          "age_over_99" : null,
+                          "age_over_10" : null,
+                          "age_over_98" : null,
+                          "age_over_97" : null,
+                          "age_over_96" : null,
+                          "given_name_viz" : "Erika",
+                          "age_over_09" : null,
+                          "age_over_08" : null,
+                          "age_over_07" : null,
+                          "issuing_country" : "AT",
+                          "age_over_06" : null,
+                          "age_over_60" : false,
+                          "age_over_05" : null,
+                          "age_over_65" : false,
+                          "age_over_67" : false,
+                          "age_over_84" : null,
+                          "age_over_83" : null,
+                          "age_over_82" : null,
+                          "age_over_81" : null,
+                          "resident_postal_code" : "12345",
+                          "age_over_80" : null,
+                          "age_over_04" : null,
+                          "age_over_03" : null,
+                          "age_in_years" : 54,
+                          "age_over_02" : null,
+                          "age_over_01" : null,
+                          "age_over_89" : null,
+                          "age_over_88" : null,
+                          "age_over_87" : null,
+                          "family_name" : "Mustermann",
+                          "age_over_86" : null,
+                          "age_over_85" : null,
+                          "family_name_viz" : "Mustermann",
+                          "age_over_39" : null,
+                          "age_over_38" : null,
+                          "age_over_37" : null,
+                          "family_name_latin1" : null,
+                          "age_over_36" : null,
+                          "age_over_35" : null,
+                          "age_over_34" : null,
+                          "age_over_33" : null,
+                          "age_over_32" : null,
+                          "age_over_31" : null,
+                          "age_over_30" : null,
+                          "age_over_29" : null,
+                          "birthplace" : "Sample City",
+                          "portrait" : null,
+                          "issuing_authority_unicode" : "Utopia Central Registry",
+                          "age_over_26" : null,
+                          "age_over_24" : null,
+                          "age_over_22" : null,
+                          "age_over_20" : null,
+                          "age_over_40" : true,
+                          "given_name" : "Erika"
+                        },
+                        "org.iso.23220.photoid.1" : {
+                          "travel_document_number" : null,
+                          "resident_house_number" : "123",
+                          "birth_city" : null,
+                          "person_id" : "24601",
+                          "resident_street" : "Sample Street",
+                          "birth_state" : null,
+                          "travel_document_type" : null,
+                          "travel_document_mrz" : null,
+                          "administrative_number" : "123456789",
+                          "birth_country" : null,
+                          "resident_state" : "Sample State"
+                        }
+                      },
+                      "idTokenClaimsMapping" : {
+                        "$.family_name" : "$.['org.iso.23220.1'].family_name",
+                        "$.given_name" : "$.['org.iso.23220.1'].given_name"
+                      },
+                      "mDocNameSpacesDataMappingConfig" : {
+                        "org.iso.23220.1" : {
+                          "entriesConfigMap" : {
+                            "portrait_capture_date" : {
+                              "type" : "string",
+                              "conversionType" : "stringToTDate"
+                            },
+                            "issue_date" : {
+                              "type" : "string",
+                              "conversionType" : "stringToFullDate"
+                            },
+                            "birth_date" : {
+                              "type" : "string",
+                              "conversionType" : "stringToFullDate"
+                            },
+                            "expiry_date" : {
+                              "type" : "string",
+                              "conversionType" : "stringToFullDate"
+                            }
+                          }
+                        }
+                      },
+                      "x5Chain" : [ "-----BEGIN CERTIFICATE-----\nMIICmDCCAj+gAwIBAgIQI49pU93pQh25TilZqbfBATAKBggqhkjOPQQDAjBiMQsw\nCQYDVQQGEwJBVDEQMA4GA1UECgwHd2FsdC5pZDEZMBcGA1UECwwQSXNzdWVyMiBU\nZXN0IFBLSTEmMCQGA1UEAwwdd2FsdC5pZCBPU1MgSXNzdWVyMiBUZXN0IElBQ0Ew\nHhcNMjYwODA2MDkzNzI1WhcNMjcwODA2MDkzNzI1WjBgMQswCQYDVQQGEwJBVDEQ\nMA4GA1UECgwHd2FsdC5pZDEZMBcGA1UECwwQSXNzdWVyMiBUZXN0IFBLSTEkMCIG\nA1UEAwwbT1NTIElzc3VlcjIgRG9jdW1lbnQgU2lnbmVyMFkwEwYHKoZIzj0CAQYI\nKoZIzj0DAQcDQgAEG0RINBiF+oQUD3d5DGnegQuXenI29JDaMGoMvioKRBN53d4U\nazakS2unu8BnsEtxutS2kqRhYBPYk9RAriU3gaOB2DCB1TAMBgNVHRMBAf8EAjAA\nMA4GA1UdDwEB/wQEAwIHgDAVBgNVHSUBAf8ECzAJBgcogYxdBQECMB0GA1UdDgQW\nBBS5uwPge8/AkJhc5xPe+k1acwcF2jAfBgNVHSMEGDAWgBRq4EfE0jIj+EyoK1iz\nl6VyqQkPNTApBgNVHRIEIjAghh5odHRwczovL2lzc3Vlci5leGFtcGxlL2F0L2lh\nY2EwMwYDVR0fBCwwKjAooCagJIYiaHR0cHM6Ly9pc3N1ZXIuZXhhbXBsZS9hdC9p\nYWNhLmNybDAKBggqhkjOPQQDAgNHADBEAiALoKeo5Laopv9yxJZVmqczHL42e7DN\nfXEvjKXTSRJ2tQIgIiMdWS5D7o4hbCU2EqVR8YbD/ycpPx9yvMpQkCu7TLQ=\n-----END CERTIFICATE-----" ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/issuer2/credential-offers" : {
+      "post" : {
+        "tags" : [ "Issuer Service API v2 - Credential Issuance" ],
+        "summary" : "Create credential offer",
+        "description" : "Create a profile-derived OpenID4VCI credential offer URL and the backing issuance session.\n\nChoose one of the following request formats:\n\n- Single-profile offer: send `profileId` with optional `runtimeOverrides`.\n- Multi-credential offer: send a non-empty `credentials` array. Each entry contains a\n  `profileId` and optional `runtimeOverrides`. Select different profiles to offer different\n  credential formats, or repeat a profile with different `credentialData` overrides to offer\n  different datasets.\n\nThe batch limit is advertised as `batch_credential_issuance.batch_size` in issuer metadata.\n\nWhen using `credentials`, put overrides inside each entry and omit top-level `profileId`\nand `runtimeOverrides` entirely, rather than setting them to null. A `profileId` request\nreturns a response containing `profileId`. A `credentials` request returns the offer response\nwithout profile fields or a `credentials` array, even when only one entry was supplied.\n\nBoth request formats support pre-authorized and authorization-code issuance flows, with offers\nreturned by reference or by value. Runtime overrides can\nbe applied per credential for one offer only. Supported\noverride fields are: issuerDid, credentialData, mapping, selectiveDisclosure,\nidTokenClaimsMapping, mDocNameSpacesDataMappingConfig, authorizedTransactionDataTypes,\nmsoData, x5Chain, notifications, and credentialStatus.\nruntimeOverrides.msoData is rejected unless the profile credential configuration\nformat is mso_mdoc. Blank or whitespace msoData.validFrom, validUntil, and\nexpectedUpdate values are rejected. Omitted override keys inherit the profile.\nJSON null for expectedUpdate clears the profile value so the MSO omits it;\nJSON null for validFrom or validUntil still inherits. ISO 18013-5 requires\nsigned <= validFrom < validUntil. expectedUpdate is optional and is not bounded\nby that ISO rule unless an issuer enables the opt-in window policy (off by default).\nOmitting msoData.validUntil uses the 365-day default, rounded to a 12-hour UTC\nbucket when rounding is enabled. Explicit timestamps, data functions, and\nfallbackValidUntil are kept as given.\nFor mDoc profiles, put namespace value functions in mapping (including <date>,\n<date-in>, and <date-before> for ISO full-date fields such as issue_date) and MSO\nvalidity functions in msoData. Top-level W3C-style mapping keys such as\nmapping.validFrom / mapping.validUntil are rejected; use msoData instead.\ncredentialData is applied as a partial object patch over the configured profile data:\nnested objects are merged, while primitive, array, and null values replace the configured value.\nEach offered credential uses its configured `credentialStatus` for all copies issued from it.\nWhen multiple proofs are supplied, those copies share the same status entry; revoking that\nentry revokes every credential referencing it. Supply `runtimeOverrides.credentialStatus`\non a single-profile offer or inside each `credentials[]` item to override the profile default.\nDifferent items can use different entries. The caller allocates and manages status entries;\nOSS embeds them without allocating new entries per copy. Shared references make copies linkable.\nRedeem different offered items through separate Credential Requests; multiple proofs request\ncopies of the selected item. Repeated issuance of an item also uses its configured status.\nAuthorization-code offers include issuer_state by default. Set issuerStateMode to OMIT only\nfor profile-based offers without runtime overrides. AUTHORIZED offers with runtimeOverrides and\nissuerStateMode OMIT are rejected with Bad Request.\nOffer/session expiry is configured with expiresInSeconds. The default is 5 minutes.\nUse -1 for no expiry.",
+        "parameters" : [ ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "anyOf" : [ {
+                  "$ref" : "#/components/schemas/id.walt.issuer2.models.CredentialOfferCreateRequest"
+                }, {
+                  "$ref" : "#/components/schemas/id.walt.issuer2.models.MultiCredentialOfferCreateRequest"
+                } ]
+              },
+              "examples" : {
+                "[authorized][single][by-reference]" : {
+                  "value" : {
+                    "profileId" : "openBadgeCredential",
+                    "authMethod" : "AUTHORIZED",
+                    "valueMode" : "BY_REFERENCE",
+                    "expiresInSeconds" : 300
+                  }
+                },
+                "[authorized][single][by-value]" : {
+                  "value" : {
+                    "profileId" : "openBadgeCredential",
+                    "authMethod" : "AUTHORIZED",
+                    "valueMode" : "BY_VALUE",
+                    "expiresInSeconds" : 300
+                  }
+                },
+                "[authorized][single][by-value][issuer_state omitted]" : {
+                  "value" : {
+                    "profileId" : "openBadgeCredential",
+                    "authMethod" : "AUTHORIZED",
+                    "issuerStateMode" : "OMIT",
+                    "valueMode" : "BY_VALUE",
+                    "expiresInSeconds" : 300
+                  }
+                },
+                "[authorized][single][by-reference][mDoc credentialData override]" : {
+                  "value" : {
+                    "profileId" : "isoMdl",
+                    "authMethod" : "AUTHORIZED",
+                    "issuerStateMode" : "INCLUDE",
+                    "valueMode" : "BY_REFERENCE",
+                    "expiresInSeconds" : 300,
+                    "runtimeOverrides" : {
+                      "credentialData" : {
+                        "org.iso.18013.5.1" : {
+                          "family_name" : {
+                            "content" : "Doe",
+                            "string" : true
+                          },
+                          "given_name" : {
+                            "content" : "Jane",
+                            "string" : true
+                          },
+                          "birth_date" : {
+                            "content" : "1986-03-22",
+                            "string" : true
+                          },
+                          "issue_date" : {
+                            "content" : "2019-10-20",
+                            "string" : true
+                          },
+                          "expiry_date" : {
+                            "content" : "2024-10-20",
+                            "string" : true
+                          },
+                          "issuing_country" : {
+                            "content" : "AT",
+                            "string" : true
+                          },
+                          "issuing_authority" : {
+                            "content" : "AT DMV",
+                            "string" : true
+                          },
+                          "document_number" : {
+                            "content" : "123456789",
+                            "string" : true
+                          },
+                          "portrait" : {
+                            "content" : "AQIDBAUGBwgJCgsMDQ4P",
+                            "string" : true
+                          },
+                          "driving_privileges" : [ {
+                            "vehicle_category_code" : {
+                              "content" : "A",
+                              "string" : true
+                            },
+                            "issue_date" : {
+                              "content" : "2018-08-09",
+                              "string" : true
+                            },
+                            "expiry_date" : {
+                              "content" : "2024-10-20",
+                              "string" : true
+                            }
+                          }, {
+                            "vehicle_category_code" : {
+                              "content" : "B",
+                              "string" : true
+                            },
+                            "issue_date" : {
+                              "content" : "2017-02-23",
+                              "string" : true
+                            },
+                            "expiry_date" : {
+                              "content" : "2024-10-20",
+                              "string" : true
+                            }
+                          } ],
+                          "un_distinguishing_sign" : {
+                            "content" : "AT",
+                            "string" : true
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "[authorized][multiple][by-reference][same dataset, different formats][EUDI PID]" : {
+                  "value" : {
+                    "credentials" : [ {
+                      "profileId" : "eudiPidSdJwt"
+                    }, {
+                      "profileId" : "eudiPidMdoc"
+                    } ],
+                    "authMethod" : "AUTHORIZED",
+                    "issuerStateMode" : "INCLUDE",
+                    "valueMode" : "BY_REFERENCE",
+                    "expiresInSeconds" : 300
+                  }
+                },
+                "[authorized][multiple][by-value][same format, different datasets][SD-JWT VC]" : {
+                  "value" : {
+                    "credentials" : [ {
+                      "profileId" : "identityCredentialSdJwt"
+                    }, {
+                      "profileId" : "taxIdCredentialSdJwt"
+                    } ],
+                    "authMethod" : "AUTHORIZED",
+                    "issuerStateMode" : "INCLUDE",
+                    "valueMode" : "BY_VALUE",
+                    "expiresInSeconds" : 300
+                  }
+                },
+                "[authorized][multiple][by-reference][runtime overrides]" : {
+                  "value" : {
+                    "credentials" : [ {
+                      "profileId" : "openBadgeCredential",
+                      "runtimeOverrides" : {
+                        "credentialData" : {
+                          "credentialSubject" : {
+                            "achievement" : {
+                              "name" : {
+                                "content" : "OpenID4VCI Implementation",
+                                "string" : true
+                              },
+                              "description" : {
+                                "content" : "Implemented an OpenID4VCI issuer with batch issuance",
+                                "string" : true
+                              },
+                              "criteria" : {
+                                "narrative" : {
+                                  "content" : "The holder implemented and tested an interoperable issuer.",
+                                  "string" : true
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }, {
+                      "profileId" : "identityCredentialSdJwt",
+                      "runtimeOverrides" : {
+                        "credentialData" : {
+                          "given_name" : {
+                            "content" : "Alice",
+                            "string" : true
+                          },
+                          "family_name" : {
+                            "content" : "Doe",
+                            "string" : true
+                          },
+                          "birthdate" : {
+                            "content" : "1990-01-01",
+                            "string" : true
+                          }
+                        },
+                        "selectiveDisclosure" : {
+                          "family_name" : {
+                            "sd" : true
+                          },
+                          "birthdate" : {
+                            "sd" : true
+                          }
+                        }
+                      }
+                    } ],
+                    "authMethod" : "AUTHORIZED",
+                    "issuerStateMode" : "INCLUDE",
+                    "valueMode" : "BY_REFERENCE",
+                    "expiresInSeconds" : 300
+                  }
+                },
+                "[pre-authorized][single][by-reference]" : {
+                  "value" : {
+                    "profileId" : "openBadgeCredential",
+                    "authMethod" : "PRE_AUTHORIZED",
+                    "valueMode" : "BY_REFERENCE",
+                    "expiresInSeconds" : 300
+                  }
+                },
+                "[pre-authorized][single][shared status][W3C]" : {
+                  "value" : {
+                    "profileId" : "openBadgeCredential",
+                    "authMethod" : "PRE_AUTHORIZED",
+                    "valueMode" : "BY_REFERENCE",
+                    "expiresInSeconds" : 300,
+                    "runtimeOverrides" : {
+                      "credentialStatus" : {
+                        "id" : {
+                          "content" : "https://status.example.com/list/1#94567",
+                          "string" : true
+                        },
+                        "type" : {
+                          "content" : "BitstringStatusListEntry",
+                          "string" : true
+                        },
+                        "statusPurpose" : {
+                          "content" : "revocation",
+                          "string" : true
+                        },
+                        "statusListIndex" : {
+                          "content" : "94567",
+                          "string" : true
+                        },
+                        "statusListCredential" : {
+                          "content" : "https://status.example.com/list/1",
+                          "string" : true
+                        }
+                      }
+                    }
+                  }
+                },
+                "[pre-authorized][single][shared status][SD-JWT]" : {
+                  "value" : {
+                    "profileId" : "identityCredentialSdJwt",
+                    "authMethod" : "PRE_AUTHORIZED",
+                    "valueMode" : "BY_REFERENCE",
+                    "expiresInSeconds" : 300,
+                    "runtimeOverrides" : {
+                      "credentialStatus" : {
+                        "status_list" : {
+                          "idx" : {
+                            "content" : "94567",
+                            "string" : false
+                          },
+                          "uri" : {
+                            "content" : "https://status.example.com/list/1",
+                            "string" : true
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "[pre-authorized][single][shared status][mdoc]" : {
+                  "value" : {
+                    "profileId" : "isoMdl",
+                    "authMethod" : "PRE_AUTHORIZED",
+                    "valueMode" : "BY_REFERENCE",
+                    "expiresInSeconds" : 300,
+                    "runtimeOverrides" : {
+                      "credentialStatus" : {
+                        "status_list" : {
+                          "idx" : {
+                            "content" : "94567",
+                            "string" : false
+                          },
+                          "uri" : {
+                            "content" : "https://status.example.com/list/1",
+                            "string" : true
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "[pre-authorized][multiple][different statuses per item]" : {
+                  "value" : {
+                    "credentials" : [ {
+                      "profileId" : "identityCredentialSdJwt",
+                      "runtimeOverrides" : {
+                        "credentialStatus" : {
+                          "status_list" : {
+                            "idx" : {
+                              "content" : "94567",
+                              "string" : false
+                            },
+                            "uri" : {
+                              "content" : "https://status.example.com/list/1",
+                              "string" : true
+                            }
+                          }
+                        }
+                      }
+                    }, {
+                      "profileId" : "identityCredentialSdJwt",
+                      "runtimeOverrides" : {
+                        "credentialStatus" : {
+                          "status_list" : {
+                            "idx" : {
+                              "content" : "12345",
+                              "string" : false
+                            },
+                            "uri" : {
+                              "content" : "https://status.example.com/list/1",
+                              "string" : true
+                            }
+                          }
+                        }
+                      }
+                    } ],
+                    "authMethod" : "PRE_AUTHORIZED",
+                    "valueMode" : "BY_REFERENCE",
+                    "expiresInSeconds" : 300
+                  }
+                },
+                "[authorized][multiple][different statuses per item]" : {
+                  "value" : {
+                    "credentials" : [ {
+                      "profileId" : "identityCredentialSdJwt",
+                      "runtimeOverrides" : {
+                        "credentialStatus" : {
+                          "status_list" : {
+                            "idx" : {
+                              "content" : "94567",
+                              "string" : false
+                            },
+                            "uri" : {
+                              "content" : "https://status.example.com/list/1",
+                              "string" : true
+                            }
+                          }
+                        }
+                      }
+                    }, {
+                      "profileId" : "identityCredentialSdJwt",
+                      "runtimeOverrides" : {
+                        "credentialStatus" : {
+                          "status_list" : {
+                            "idx" : {
+                              "content" : "12345",
+                              "string" : false
+                            },
+                            "uri" : {
+                              "content" : "https://status.example.com/list/1",
+                              "string" : true
+                            }
+                          }
+                        }
+                      }
+                    } ],
+                    "authMethod" : "AUTHORIZED",
+                    "issuerStateMode" : "INCLUDE",
+                    "valueMode" : "BY_REFERENCE",
+                    "expiresInSeconds" : 300
+                  }
+                },
+                "[pre-authorized][single][by-value]" : {
+                  "value" : {
+                    "profileId" : "openBadgeCredential",
+                    "authMethod" : "PRE_AUTHORIZED",
+                    "valueMode" : "BY_VALUE",
+                    "expiresInSeconds" : 300
+                  }
+                },
+                "[pre-authorized][single][by-reference][provided tx_code]" : {
+                  "value" : {
+                    "profileId" : "openBadgeCredential",
+                    "authMethod" : "PRE_AUTHORIZED",
+                    "valueMode" : "BY_REFERENCE",
+                    "expiresInSeconds" : 300,
+                    "txCode" : {
+                      "inputMode" : "numeric",
+                      "length" : 6,
+                      "description" : "Enter the PIN shown by the issuer"
+                    },
+                    "txCodeValue" : "123456"
+                  }
+                },
+                "[pre-authorized][single][by-reference][generated tx_code]" : {
+                  "value" : {
+                    "profileId" : "openBadgeCredential",
+                    "authMethod" : "PRE_AUTHORIZED",
+                    "valueMode" : "BY_REFERENCE",
+                    "expiresInSeconds" : 300,
+                    "txCode" : {
+                      "inputMode" : "numeric",
+                      "length" : 6,
+                      "description" : "Enter the generated PIN shown by the issuer"
+                    }
+                  }
+                },
+                "[pre-authorized][single][by-reference][expires in 2 minutes]" : {
+                  "value" : {
+                    "profileId" : "openBadgeCredential",
+                    "authMethod" : "PRE_AUTHORIZED",
+                    "valueMode" : "BY_REFERENCE",
+                    "expiresInSeconds" : 120
+                  }
+                },
+                "[pre-authorized][single][by-reference][no expiry]" : {
+                  "value" : {
+                    "profileId" : "openBadgeCredential",
+                    "authMethod" : "PRE_AUTHORIZED",
+                    "valueMode" : "BY_REFERENCE",
+                    "expiresInSeconds" : -1
+                  }
+                },
+                "[pre-authorized][single][by-reference][credentialData override]" : {
+                  "value" : {
+                    "profileId" : "openBadgeCredential",
+                    "authMethod" : "PRE_AUTHORIZED",
+                    "valueMode" : "BY_REFERENCE",
+                    "expiresInSeconds" : 300,
+                    "runtimeOverrides" : {
+                      "credentialData" : {
+                        "credentialSubject" : {
+                          "achievement" : {
+                            "name" : {
+                              "content" : "Computer Science",
+                              "string" : true
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "[pre-authorized][single][by-reference][issuerKey override]" : {
+                  "value" : {
+                    "profileId" : "openBadgeCredential",
+                    "authMethod" : "PRE_AUTHORIZED",
+                    "valueMode" : "BY_REFERENCE",
+                    "expiresInSeconds" : 300,
+                    "runtimeOverrides" : {
+                      "issuerKey" : {
+                        "type" : {
+                          "content" : "jwk",
+                          "string" : true
+                        },
+                        "jwk" : {
+                          "kty" : {
+                            "content" : "EC",
+                            "string" : true
+                          },
+                          "d" : {
+                            "content" : "KJ4k3Vcl5Sj9Mfq4rrNXBm2MoPoY3_Ak_PIR_EgsFhQ",
+                            "string" : true
+                          },
+                          "crv" : {
+                            "content" : "P-256",
+                            "string" : true
+                          },
+                          "x" : {
+                            "content" : "G0RINBiF-oQUD3d5DGnegQuXenI29JDaMGoMvioKRBM",
+                            "string" : true
+                          },
+                          "y" : {
+                            "content" : "ed3eFGs2pEtrp7vAZ7BLcbrUtpKkYWAT2JPUQK4lN4E",
+                            "string" : true
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "[pre-authorized][single][by-reference][selective disclosure override]" : {
+                  "value" : {
+                    "profileId" : "openBadgeCredential",
+                    "authMethod" : "PRE_AUTHORIZED",
+                    "valueMode" : "BY_REFERENCE",
+                    "expiresInSeconds" : 300,
+                    "runtimeOverrides" : {
+                      "selectiveDisclosure" : {
+                        "credentialSubject" : {
+                          "sd" : false,
+                          "children" : {
+                            "achievement" : {
+                              "sd" : false,
+                              "children" : {
+                                "type" : {
+                                  "sd" : true
+                                },
+                                "name" : {
+                                  "sd" : true
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "[pre-authorized][single][by-reference][mDoc credentialData override]" : {
+                  "value" : {
+                    "profileId" : "isoPhotoId",
+                    "authMethod" : "PRE_AUTHORIZED",
+                    "valueMode" : "BY_REFERENCE",
+                    "expiresInSeconds" : 300,
+                    "runtimeOverrides" : {
+                      "credentialData" : {
+                        "org.iso.23220.1" : {
+                          "age_over_18" : {
+                            "content" : "true",
+                            "string" : false
+                          },
+                          "issuing_country" : {
+                            "content" : "AT",
+                            "string" : true
+                          },
+                          "given_name" : {
+                            "content" : "Jane",
+                            "string" : true
+                          },
+                          "family_name" : {
+                            "content" : "Doe",
+                            "string" : true
+                          },
+                          "birth_date" : {
+                            "content" : "2003-12-21",
+                            "string" : true
+                          },
+                          "issue_date" : {
+                            "content" : "2025-12-13",
+                            "string" : true
+                          },
+                          "issuing_authority_unicode" : {
+                            "content" : "walt.id Issuer",
+                            "string" : true
+                          },
+                          "expiry_date" : {
+                            "content" : "2026-12-13",
+                            "string" : true
+                          }
+                        },
+                        "org.iso.23220.photoid.1" : {
+                          "person_id" : {
+                            "content" : "123456",
+                            "string" : true
+                          },
+                          "administrative_number" : {
+                            "content" : "654321",
+                            "string" : true
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "[pre-authorized][single][by-reference][authorized transaction types override]" : {
+                  "value" : {
+                    "profileId" : "euAgeVerificationMdoc",
+                    "authMethod" : "PRE_AUTHORIZED",
+                    "valueMode" : "BY_REFERENCE",
+                    "expiresInSeconds" : 300,
+                    "runtimeOverrides" : {
+                      "authorizedTransactionDataTypes" : [ "urn:eudi:sca:payment:1" ]
+                    }
+                  }
+                },
+                "[pre-authorized][multiple][by-reference]" : {
+                  "value" : {
+                    "credentials" : [ {
+                      "profileId" : "openBadgeCredential"
+                    }, {
+                      "profileId" : "isoPhotoId"
+                    } ],
+                    "authMethod" : "PRE_AUTHORIZED",
+                    "valueMode" : "BY_REFERENCE",
+                    "expiresInSeconds" : 300
+                  }
+                },
+                "[pre-authorized][multiple][by-value]" : {
+                  "value" : {
+                    "credentials" : [ {
+                      "profileId" : "openBadgeCredential"
+                    }, {
+                      "profileId" : "isoPhotoId"
+                    } ],
+                    "authMethod" : "PRE_AUTHORIZED",
+                    "valueMode" : "BY_VALUE",
+                    "expiresInSeconds" : 300
+                  }
+                },
+                "[pre-authorized][multiple][by-reference][runtime overrides]" : {
+                  "value" : {
+                    "credentials" : [ {
+                      "profileId" : "openBadgeCredential",
+                      "runtimeOverrides" : {
+                        "credentialData" : {
+                          "credentialSubject" : {
+                            "achievement" : {
+                              "name" : {
+                                "content" : "OpenID4VCI Implementation",
+                                "string" : true
+                              },
+                              "description" : {
+                                "content" : "Implemented an OpenID4VCI issuer with batch issuance",
+                                "string" : true
+                              },
+                              "criteria" : {
+                                "narrative" : {
+                                  "content" : "The holder implemented and tested an interoperable issuer.",
+                                  "string" : true
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }, {
+                      "profileId" : "identityCredentialSdJwt",
+                      "runtimeOverrides" : {
+                        "credentialData" : {
+                          "given_name" : {
+                            "content" : "Alice",
+                            "string" : true
+                          },
+                          "family_name" : {
+                            "content" : "Doe",
+                            "string" : true
+                          },
+                          "birthdate" : {
+                            "content" : "1990-01-01",
+                            "string" : true
+                          }
+                        },
+                        "selectiveDisclosure" : {
+                          "family_name" : {
+                            "sd" : true
+                          },
+                          "birthdate" : {
+                            "sd" : true
+                          }
+                        }
+                      }
+                    } ],
+                    "authMethod" : "PRE_AUTHORIZED",
+                    "valueMode" : "BY_REFERENCE",
+                    "expiresInSeconds" : 300
+                  }
+                }
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Credential offer created",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "anyOf" : [ {
+                    "$ref" : "#/components/schemas/id.walt.issuer2.models.CredentialOfferCreateResponse"
+                  }, {
+                    "$ref" : "#/components/schemas/id.walt.issuer2.models.MultiCredentialOfferCreateResponse"
+                  } ]
+                },
+                "examples" : {
+                  "Offer response by reference" : {
+                    "value" : {
+                      "offerId" : "018f8d6e-8df4-7b73-9f3d-f3df21a4374a",
+                      "profileId" : "openBadgeCredential",
+                      "authMethod" : "AUTHORIZED",
+                      "issuerStateMode" : "INCLUDE",
+                      "expiresAt" : 1739000000000,
+                      "credentialOffer" : "openid-credential-offer://?credential_offer_uri=http%3A%2F%2Flocalhost%3A7002%2Fopenid4vci%2Fcredential-offer%3Fid%3D018f8d6e-8df4-7b73-9f3d-f3df21a4374a"
+                    }
+                  },
+                  "Offer response by value" : {
+                    "value" : {
+                      "offerId" : "018f8d6e-8df4-7b73-9f3d-f3df21a4374a",
+                      "profileId" : "openBadgeCredential",
+                      "authMethod" : "AUTHORIZED",
+                      "issuerStateMode" : "INCLUDE",
+                      "expiresAt" : 1739000000000,
+                      "credentialOffer" : "openid-credential-offer://?credential_offer=%7B%22credential_issuer%22%3A%22http%3A%2F%2Flocalhost%3A7002%2Fopenid4vci%22%2C%22credential_configuration_ids%22%3A%5B%22OpenBadgeCredential_jwt_vc_json%22%5D%2C%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22018f8d6e-8df4-7b73-9f3d-f3df21a4374a%22%7D%7D%7D"
+                    }
+                  },
+                  "Offer response by value with issuer_state included" : {
+                    "value" : {
+                      "offerId" : "018f8d6e-8df4-7b73-9f3d-f3df21a4374a",
+                      "profileId" : "openBadgeCredential",
+                      "authMethod" : "AUTHORIZED",
+                      "issuerStateMode" : "INCLUDE",
+                      "expiresAt" : 1739000000000,
+                      "credentialOffer" : "openid-credential-offer://?credential_offer=%7B%22credential_issuer%22%3A%22http%3A%2F%2Flocalhost%3A7002%2Fopenid4vci%22%2C%22credential_configuration_ids%22%3A%5B%22OpenBadgeCredential_jwt_vc_json%22%5D%2C%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22018f8d6e-8df4-7b73-9f3d-f3df21a4374a%22%7D%7D%7D"
+                    }
+                  },
+                  "Multiple-format offer response by reference" : {
+                    "value" : {
+                      "offerId" : "018f8d6e-8df4-7b73-9f3d-f3df21a4374a",
+                      "authMethod" : "AUTHORIZED",
+                      "issuerStateMode" : "INCLUDE",
+                      "expiresAt" : 1739000000000,
+                      "credentialOffer" : "openid-credential-offer://?credential_offer_uri=http%3A%2F%2Flocalhost%3A7002%2Fopenid4vci%2Fcredential-offer%3Fid%3D018f8d6e-8df4-7b73-9f3d-f3df21a4374a"
+                    }
+                  },
+                  "Multiple-dataset offer response by value" : {
+                    "value" : {
+                      "offerId" : "018f8d6e-8df4-7b73-9f3d-f3df21a4374a",
+                      "authMethod" : "AUTHORIZED",
+                      "issuerStateMode" : "INCLUDE",
+                      "expiresAt" : 1739000000000,
+                      "credentialOffer" : "openid-credential-offer://?credential_offer=%7B%22credential_issuer%22%3A%22http%3A%2F%2Flocalhost%3A7002%2Fopenid4vci%22%2C%22credential_configuration_ids%22%3A%5B%22identity_credential%22%2C%22asit.tax-id-credential%22%5D%2C%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22018f8d6e-8df4-7b73-9f3d-f3df21a4374a%22%7D%7D%7D"
+                    }
+                  },
+                  "Pre-authorized offer response with generated tx_code" : {
+                    "value" : {
+                      "offerId" : "018f8d6e-8df4-7b73-9f3d-f3df21a4374a",
+                      "profileId" : "openBadgeCredential",
+                      "authMethod" : "PRE_AUTHORIZED",
+                      "expiresAt" : 1739000000000,
+                      "txCodeValue" : "483921",
+                      "credentialOffer" : "openid-credential-offer://?credential_offer_uri=http%3A%2F%2Flocalhost%3A7002%2Fopenid4vci%2Fcredential-offer%3Fid%3D018f8d6e-8df4-7b73-9f3d-f3df21a4374a"
+                    }
+                  },
+                  "Pre-authorized offer response with provided tx_code" : {
+                    "value" : {
+                      "offerId" : "018f8d6e-8df4-7b73-9f3d-f3df21a4374a",
+                      "profileId" : "openBadgeCredential",
+                      "authMethod" : "PRE_AUTHORIZED",
+                      "expiresAt" : 1739000000000,
+                      "txCodeValue" : "123456",
+                      "credentialOffer" : "openid-credential-offer://?credential_offer_uri=http%3A%2F%2Flocalhost%3A7002%2Fopenid4vci%2Fcredential-offer%3Fid%3D018f8d6e-8df4-7b73-9f3d-f3df21a4374a"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/issuer2/sessions" : {
+      "get" : {
+        "tags" : [ "Issuer Service API v2 - Credential Issuance" ],
+        "summary" : "List issuance sessions",
+        "description" : "List currently stored issuance sessions.",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "Issuance sessions",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "anyOf" : [ {
+                      "$ref" : "#/components/schemas/id.walt.issuer2.models.SingleIssuanceSession"
+                    }, {
+                      "$ref" : "#/components/schemas/id.walt.issuer2.domain.IssuanceSession"
+                    } ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/issuer2/sessions/{sessionId}" : {
+      "get" : {
+        "tags" : [ "Issuer Service API v2 - Credential Issuance" ],
+        "summary" : "Get issuance session",
+        "description" : "Get one issuance session by session ID.",
+        "parameters" : [ {
+          "name" : "sessionId",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Issuance session",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "anyOf" : [ {
+                    "$ref" : "#/components/schemas/id.walt.issuer2.models.SingleIssuanceSession"
+                  }, {
+                    "$ref" : "#/components/schemas/id.walt.issuer2.domain.IssuanceSession"
+                  } ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/issuer2/events" : {
+      "get" : {
+        "tags" : [ "Issuer Service API v2 - Credential Issuance" ],
+        "summary" : "Receive issuer protocol events via Server-Sent Events (SSE)",
+        "description" : "Streams protocol outcomes across the issuer. Each event contains a requestId and may contain\na correlated issuance session. Failed events expose error and error_description directly.\n\nEvents without session correlation are available only on this issuer-level stream. Correlated\nevents are also sent to the corresponding session stream and configured session webhook.\nNonce request events are always uncorrelated and are available only on this issuer-level stream.",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "SSE connection established. Events are streamed as text/event-stream.",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string",
+                  "title" : "String"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/issuer2/sessions/{sessionId}/events" : {
+      "get" : {
+        "tags" : [ "Issuer Service API v2 - Credential Issuance" ],
+        "summary" : "Receive issuance session update events via Server-Sent Events (SSE)",
+        "description" : "Establishes an SSE connection to receive real-time updates about an issuance session.\n\nEvents:\n- `credential_offer_created`, `credential_offer_retrieved`\n- `pushed_authorization_request_succeeded`, `pushed_authorization_request_failed`\n- `authorization_request_succeeded`, `authorization_request_failed`\n- `token_request_<grant>_succeeded`, `token_request_<grant>_failed`\n- `credential_request_failed`\n- `credential_request_<format>_succeeded`, `credential_request_<format>_failed`\n- `issuance_status_changed`\n\nToken grants are `authorization_code`, `pre_authorized_code`, and `refresh_token`.\nA token request whose `grant_type` is missing, malformed, or unsupported emits\n`token_request_failed` because no supported grant can be identified.\nCredential formats are grouped as `sd_jwt_vc`, `w3c_vc`, and `mso_mdoc`. Once the\ntrusted session configuration is resolved, failures use the format-specific event;\nearlier failures use `credential_request_failed`.\n\nEvents use the same KtorSessionUpdate envelope as webhook notifications.",
+        "parameters" : [ {
+          "name" : "sessionId",
+          "in" : "path",
+          "description" : "Issuance session identifier returned as offerId when creating a credential offer",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "example" : "550e8400-e29b-41d4-a716-446655440000"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "SSE connection established. Events are streamed as text/event-stream.",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string",
+                  "title" : "String"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Issuance session not found",
+            "headers" : { }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/.well-known/openid-credential-issuer/openid4vci" : {
+      "get" : {
+        "tags" : [ "Issuer Service API v2 - OpenID4VCI" ],
+        "summary" : "Get Credential Issuer metadata",
+        "parameters" : [ {
+          "name" : "Accept",
+          "in" : "header",
+          "description" : "Use application/jwt or application/openidvci-issuer-metadata+jwt for signed metadata; defaults to application/json.",
+          "required" : false,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Unsigned JSON or signed OpenID4VCI Credential Issuer metadata",
+            "headers" : { },
+            "content" : {
+              "application/jwt" : {
+                "schema" : {
+                  "type" : "string",
+                  "title" : "String"
+                }
+              },
+              "application/openidvci-issuer-metadata+jwt" : {
+                "schema" : {
+                  "type" : "string",
+                  "title" : "String"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/.well-known/oauth-authorization-server/openid4vci" : {
+      "get" : {
+        "tags" : [ "Issuer Service API v2 - OpenID4VCI" ],
+        "summary" : "Get Authorization Server metadata",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "OAuth Authorization Server metadata",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/.well-known/jwt-vc-issuer/openid4vci" : {
+      "get" : {
+        "tags" : [ "Issuer Service API v2 - OpenID4VCI" ],
+        "summary" : "Get SD-JWT VC issuer metadata",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "SD-JWT VC issuer metadata",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/.well-known/vct/{type}" : {
+      "get" : {
+        "tags" : [ "Issuer Service API v2 - OpenID4VCI" ],
+        "summary" : "Get SD-JWT VC type metadata",
+        "description" : "Resolve configured self-hosted SD-JWT VC type metadata through `/.well-known/vct/{type}` or `/openid4vci/{type}`. Unknown types return 404. OpenID4VCI protocol path names are reserved and cannot be used for self-hosted VCT URLs.",
+        "parameters" : [ {
+          "name" : "type",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "SD-JWT VC type metadata",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "The type has no self-hosted metadata or uses a reserved protocol path name.",
+            "headers" : { }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/openid4vci/{type}" : {
+      "get" : {
+        "tags" : [ "Issuer Service API v2 - OpenID4VCI" ],
+        "summary" : "Get SD-JWT VC type metadata",
+        "description" : "Resolve configured self-hosted SD-JWT VC type metadata through `/.well-known/vct/{type}` or `/openid4vci/{type}`. Unknown types return 404. OpenID4VCI protocol path names are reserved and cannot be used for self-hosted VCT URLs.",
+        "parameters" : [ {
+          "name" : "type",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "SD-JWT VC type metadata",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "The type has no self-hosted metadata or uses a reserved protocol path name.",
+            "headers" : { }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/openid4vci/jwks" : {
+      "get" : {
+        "tags" : [ "Issuer Service API v2 - OpenID4VCI" ],
+        "summary" : "Get issuer JWKS",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "Issuer public keys",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/openid4vci/credential-offer" : {
+      "get" : {
+        "tags" : [ "Issuer Service API v2 - OpenID4VCI" ],
+        "summary" : "Get credential offer",
+        "description" : "Resolve a credential offer by issuance session ID.",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "query",
+          "required" : false,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Credential offer",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/openid4vci/par" : {
+      "post" : {
+        "tags" : [ "Issuer Service API v2 - OpenID4VCI" ],
+        "summary" : "Pushed Authorization Request (PAR)",
+        "description" : "RFC 9126 PAR endpoint: submit authorization parameters and receive a request_uri.",
+        "parameters" : [ ],
+        "requestBody" : {
+          "description" : "Authorization request parameters (form-encoded)",
+          "content" : {
+            "application/x-www-form-urlencoded" : {
+              "schema" : {
+                "type" : "object",
+                "additionalProperties" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "string",
+                    "title" : "String"
+                  },
+                  "title" : "ArrayList<String>"
+                },
+                "title" : "LinkedHashMap<String,ArrayList<String>>"
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "201" : {
+            "description" : "PAR response with request_uri",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.openid4vci.responses.par.PushedAuthorizationResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid PAR request",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.openid4vci.errors.OAuthError"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "PAR processing failed",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.openid4vci.errors.OAuthError"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/openid4vci/authorize" : {
+      "get" : {
+        "tags" : [ "Issuer Service API v2 - OpenID4VCI" ],
+        "summary" : "Authorization endpoint",
+        "description" : "The authorization endpoint",
+        "parameters" : [ ],
+        "responses" : {
+          "302" : {
+            "description" : "Redirect containing authorization response parameters",
+            "headers" : { }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/openid4vci/token" : {
+      "post" : {
+        "tags" : [ "Issuer Service API v2 - OpenID4VCI" ],
+        "summary" : "Token endpoint",
+        "description" : "The token endpoint. A DPoP proof binds the issued access token to the proof key.",
+        "parameters" : [ {
+          "name" : "DPoP",
+          "in" : "header",
+          "description" : "RFC 9449 DPoP proof JWT for this token request",
+          "required" : false,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Access token response",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid token request",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.openid4vci.errors.OAuthError"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Client authentication failed",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.openid4vci.errors.OAuthError"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Token processing failed",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.openid4vci.errors.OAuthError"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/openid4vci/nonce" : {
+      "post" : {
+        "tags" : [ "Issuer Service API v2 - OpenID4VCI" ],
+        "summary" : "Nonce endpoint",
+        "description" : "Return a signed OpenID4VCI c_nonce. This endpoint is not protected by an access token.",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "Nonce response",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Nonce generation failed",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.openid4vci.errors.OAuthError"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/openid4vci/credential" : {
+      "post" : {
+        "tags" : [ "Issuer Service API v2 - OpenID4VCI" ],
+        "summary" : "Credential endpoint",
+        "description" : "Issue one or more credentials for a single credential target. Plaintext JSON and encrypted\nJWT requests are accepted.\n\nFor batch issuance, provide multiple proof JWTs in `proofs.jwt`. Credentials returned by one\nrequest share the Credential Format and Credential Dataset selected by either\n`credential_identifier` or `credential_configuration_id`; each proof supplies the cryptographic\nbinding data for one issued credential. Use separate Credential Endpoint requests for different\nformats or datasets. The maximum accepted batch size is advertised as\n`batch_credential_issuance.batch_size` in Credential Issuer metadata.\n\nMultiple proofs when batch issuance is disabled, or more proofs than the advertised limit,\nreturn `invalid_credential_request`. Invalid proof signatures return `invalid_proof`.\nEach offered credential uses its configured `credentialStatus` for all copies issued from it.\nWhen multiple proofs are supplied, those copies share the same status entry. Revoking that\nentry revokes every credential referencing it, including copies issued by later requests.\nShared status references also make the copies linkable.\nDifferent `credentials[]` items can supply different statuses, each used for its corresponding item.\nThese rules apply to both single-profile and multi-credential offers.\n\nWhen several authorized datasets share a configuration, selecting it by\n`credential_configuration_id` is ambiguous and returns `invalid_credential_request`.\nRequest `authorization_details` during authorization or token exchange to obtain dataset\nidentifiers, then send a separate request using `credential_identifier` for each dataset.",
+        "parameters" : [ {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Bearer or DPoP access-token authorization",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        }, {
+          "name" : "DPoP",
+          "in" : "header",
+          "description" : "Required when presenting a DPoP-bound access token",
+          "required" : false,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "Encrypted Credential Request as compact JWE",
+          "content" : {
+            "application/jwt" : {
+              "schema" : {
+                "type" : "string",
+                "title" : "String"
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Credential response",
+            "headers" : { },
+            "content" : {
+              "application/jwt" : {
+                "schema" : {
+                  "type" : "string",
+                  "title" : "String"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid credential request",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.openid4vci.errors.CredentialError"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Credential authorization failed",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.openid4vci.errors.OAuthError"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credential access is insufficiently scoped",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.openid4vci.errors.OAuthError"
+                }
+              }
+            }
+          },
+          "415" : {
+            "description" : "Unsupported credential request media type",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.openid4vci.errors.CredentialError"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Credential processing failed",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.openid4vci.errors.OAuthError"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "id.walt.commons.web.modules.FeatureFlagInformationModule.FeatureFlagInformation" : {
+        "type" : "object",
+        "properties" : {
+          "features" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "LinkedHashMap<String,String>"
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int32",
+            "title" : "Int"
+          }
+        },
+        "required" : [ "features", "total" ],
+        "title" : "FeatureFlagInformationModule.FeatureFlagInformation"
+      },
+      "id.walt.commons.web.modules.FeatureFlagInformationModule.FeatureFlagInformations" : {
+        "type" : "object",
+        "properties" : {
+          "enabled" : {
+            "$ref" : "#/components/schemas/id.walt.commons.web.modules.FeatureFlagInformationModule.FeatureFlagInformation"
+          },
+          "disabled" : {
+            "$ref" : "#/components/schemas/id.walt.commons.web.modules.FeatureFlagInformationModule.FeatureFlagInformation"
+          },
+          "defaultedDisabled" : {
+            "$ref" : "#/components/schemas/id.walt.commons.web.modules.FeatureFlagInformationModule.FeatureFlagInformation"
+          }
+        },
+        "required" : [ "defaultedDisabled", "disabled", "enabled" ],
+        "title" : "FeatureFlagInformationModule.FeatureFlagInformations"
+      },
+      "id.walt.issuer2.domain.CredentialProfile" : {
+        "type" : "object",
+        "properties" : {
+          "profileId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "name" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "credentialConfigurationId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "issuerKey" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "issuerDid" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "credentialData" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "mapping" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "selectiveDisclosure" : {
+            "$ref" : "#/components/schemas/id.walt.sdjwt.SDMap"
+          },
+          "idTokenClaimsMapping" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "LinkedHashMap<String,String>"
+          },
+          "mDocNameSpacesDataMappingConfig" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "$ref" : "#/components/schemas/object"
+            },
+            "title" : "LinkedHashMap<String,>"
+          },
+          "authorizedTransactionDataTypes" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "msoData" : {
+            "$ref" : "#/components/schemas/MsoData"
+          },
+          "x5Chain" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "notifications" : {
+            "$ref" : "#/components/schemas/id.walt.issuer2.notifications.IssuanceNotifications"
+          },
+          "credentialStatus" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonElement"
+          }
+        },
+        "required" : [ "credentialConfigurationId", "credentialData", "issuerKey", "name", "profileId" ],
+        "title" : "CredentialProfile"
+      },
+      "kotlinx.serialization.json.JsonObject" : {
+        "type" : "object",
+        "title" : "JsonObject"
+      },
+      "id.walt.sdjwt.SDMap" : {
+        "type" : "object",
+        "title" : "SDMap"
+      },
+      "object" : {
+        "type" : "object",
+        "properties" : {
+          "entriesConfigMap" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "$ref" : "#/components/schemas/id.walt.mdoc.dataelement.json.JsonElementToCborMappingConfig"
+            },
+            "title" : "LinkedHashMap<String,JsonElementToCborMappingConfig>"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "entriesConfigMap", "type" ],
+        "title" : ""
+      },
+      "id.walt.mdoc.dataelement.json.JsonElementToCborMappingConfig" : {
+        "anyOf" : [ {
+          "$ref" : "#/components/schemas/array"
+        }, {
+          "$ref" : "#/components/schemas/object"
+        }, {
+          "$ref" : "#/components/schemas/string"
+        } ],
+        "discriminator" : {
+          "propertyName" : "type"
+        },
+        "title" : "JsonElementToCborMappingConfig"
+      },
+      "array" : {
+        "type" : "object",
+        "properties" : {
+          "arrayConfig" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.mdoc.dataelement.json.JsonElementToCborMappingConfig"
+            },
+            "title" : "ArrayList<JsonElementToCborMappingConfig>"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "arrayConfig" ],
+        "title" : ""
+      },
+      "string" : {
+        "type" : "object",
+        "properties" : {
+          "conversionType" : {
+            "$ref" : "#/components/schemas/id.walt.mdoc.dataelement.json.StringToCborTypeConversion"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "conversionType" ],
+        "title" : ""
+      },
+      "id.walt.mdoc.dataelement.json.StringToCborTypeConversion" : {
+        "type" : "string",
+        "enum" : [ "stringToFullDate", "stringToTDate", "base64StringToByteString", "base64UrlStringToByteString" ],
+        "title" : "StringToCborTypeConversion"
+      },
+      "MsoData" : {
+        "type" : "object",
+        "properties" : {
+          "validFrom" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "validUntil" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "expectedUpdate" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "title" : "MsoData"
+      },
+      "id.walt.issuer2.notifications.IssuanceNotifications" : {
+        "type" : "object",
+        "properties" : {
+          "webhook" : {
+            "$ref" : "#/components/schemas/id.walt.issuer2.notifications.IssuanceNotifications.WebhookNotification"
+          }
+        },
+        "title" : "IssuanceNotifications"
+      },
+      "id.walt.issuer2.notifications.IssuanceNotifications.WebhookNotification" : {
+        "type" : "object",
+        "properties" : {
+          "url" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "url" ],
+        "title" : "IssuanceNotifications.WebhookNotification"
+      },
+      "kotlinx.serialization.json.JsonElement" : {
+        "type" : "object",
+        "title" : "JsonElement"
+      },
+      "id.walt.openid4vci.offers.AuthenticationMethod" : {
+        "type" : "string",
+        "enum" : [ "PRE_AUTHORIZED", "AUTHORIZED" ],
+        "title" : "AuthenticationMethod"
+      },
+      "id.walt.openid4vci.offers.IssuerStateMode" : {
+        "type" : "string",
+        "enum" : [ "INCLUDE", "OMIT" ],
+        "title" : "IssuerStateMode"
+      },
+      "id.walt.openid4vci.offers.CredentialOfferValueMode" : {
+        "type" : "string",
+        "enum" : [ "BY_REFERENCE", "BY_VALUE" ],
+        "title" : "CredentialOfferValueMode"
+      },
+      "id.walt.openid4vci.offers.TxCode" : {
+        "type" : "object",
+        "properties" : {
+          "input_mode" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "length" : {
+            "type" : "integer",
+            "format" : "int32",
+            "title" : "Int"
+          },
+          "description" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "title" : "TxCode"
+      },
+      "id.walt.issuer2.models.CredentialOfferRuntimeOverrides" : {
+        "type" : "object",
+        "properties" : {
+          "issuerDid" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "issuerKey" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "expectedCredentialProofKeyJwk" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "credentialData" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "mapping" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "selectiveDisclosure" : {
+            "$ref" : "#/components/schemas/id.walt.sdjwt.SDMap"
+          },
+          "idTokenClaimsMapping" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "LinkedHashMap<String,String>"
+          },
+          "mDocNameSpacesDataMappingConfig" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "$ref" : "#/components/schemas/object"
+            },
+            "title" : "LinkedHashMap<String,>"
+          },
+          "authorizedTransactionDataTypes" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "msoData" : {
+            "$ref" : "#/components/schemas/MsoData"
+          },
+          "x5Chain" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "notifications" : {
+            "$ref" : "#/components/schemas/id.walt.issuer2.notifications.IssuanceNotifications"
+          },
+          "credentialStatus" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonElement"
+          }
+        },
+        "title" : "CredentialOfferRuntimeOverrides"
+      },
+      "id.walt.issuer2.models.CredentialOfferCreateRequest" : {
+        "type" : "object",
+        "properties" : {
+          "profileId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "authMethod" : {
+            "$ref" : "#/components/schemas/id.walt.openid4vci.offers.AuthenticationMethod"
+          },
+          "issuerStateMode" : {
+            "$ref" : "#/components/schemas/id.walt.openid4vci.offers.IssuerStateMode"
+          },
+          "valueMode" : {
+            "$ref" : "#/components/schemas/id.walt.openid4vci.offers.CredentialOfferValueMode"
+          },
+          "expiresInSeconds" : {
+            "type" : "integer",
+            "format" : "int64",
+            "title" : "Long"
+          },
+          "txCode" : {
+            "$ref" : "#/components/schemas/id.walt.openid4vci.offers.TxCode"
+          },
+          "txCodeValue" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "runtimeOverrides" : {
+            "$ref" : "#/components/schemas/id.walt.issuer2.models.CredentialOfferRuntimeOverrides"
+          },
+          "sessionId" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "authMethod", "expiresInSeconds", "profileId", "valueMode" ],
+        "title" : "CredentialOfferCreateRequest"
+      },
+      "id.walt.issuer2.models.CredentialOfferCredential" : {
+        "type" : "object",
+        "properties" : {
+          "profileId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "runtimeOverrides" : {
+            "$ref" : "#/components/schemas/id.walt.issuer2.models.CredentialOfferRuntimeOverrides"
+          }
+        },
+        "required" : [ "profileId" ],
+        "title" : "CredentialOfferCredential"
+      },
+      "id.walt.issuer2.models.MultiCredentialOfferCreateRequest" : {
+        "type" : "object",
+        "properties" : {
+          "credentials" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.issuer2.models.CredentialOfferCredential"
+            },
+            "title" : "ArrayList<CredentialOfferCredential>"
+          },
+          "authMethod" : {
+            "$ref" : "#/components/schemas/id.walt.openid4vci.offers.AuthenticationMethod"
+          },
+          "issuerStateMode" : {
+            "$ref" : "#/components/schemas/id.walt.openid4vci.offers.IssuerStateMode"
+          },
+          "valueMode" : {
+            "$ref" : "#/components/schemas/id.walt.openid4vci.offers.CredentialOfferValueMode"
+          },
+          "expiresInSeconds" : {
+            "type" : "integer",
+            "format" : "int64",
+            "title" : "Long"
+          },
+          "txCode" : {
+            "$ref" : "#/components/schemas/id.walt.openid4vci.offers.TxCode"
+          },
+          "txCodeValue" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "sessionId" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "authMethod", "credentials", "expiresInSeconds", "valueMode" ],
+        "title" : "MultiCredentialOfferCreateRequest"
+      },
+      "id.walt.issuer2.models.CredentialOfferCreateResponse" : {
+        "type" : "object",
+        "properties" : {
+          "offerId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "profileId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "authMethod" : {
+            "$ref" : "#/components/schemas/id.walt.openid4vci.offers.AuthenticationMethod"
+          },
+          "issuerStateMode" : {
+            "$ref" : "#/components/schemas/id.walt.openid4vci.offers.IssuerStateMode"
+          },
+          "expiresAt" : {
+            "type" : "integer",
+            "format" : "int64",
+            "title" : "Long"
+          },
+          "txCodeValue" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "credentialOffer" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "authMethod", "credentialOffer", "expiresAt", "offerId", "profileId" ],
+        "title" : "CredentialOfferCreateResponse"
+      },
+      "id.walt.issuer2.models.MultiCredentialOfferCreateResponse" : {
+        "type" : "object",
+        "properties" : {
+          "offerId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "authMethod" : {
+            "$ref" : "#/components/schemas/id.walt.openid4vci.offers.AuthenticationMethod"
+          },
+          "issuerStateMode" : {
+            "$ref" : "#/components/schemas/id.walt.openid4vci.offers.IssuerStateMode"
+          },
+          "expiresAt" : {
+            "type" : "integer",
+            "format" : "int64",
+            "title" : "Long"
+          },
+          "txCodeValue" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "credentialOffer" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "authMethod", "credentialOffer", "expiresAt", "offerId" ],
+        "title" : "MultiCredentialOfferCreateResponse"
+      },
+      "id.walt.openid4vci.offers.CredentialOffer" : {
+        "type" : "object",
+        "properties" : {
+          "credential_issuer" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "credential_configuration_ids" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "grants" : {
+            "$ref" : "#/components/schemas/id.walt.openid4vci.offers.CredentialOfferGrants"
+          }
+        },
+        "required" : [ "credential_configuration_ids", "credential_issuer" ],
+        "title" : "CredentialOffer"
+      },
+      "id.walt.openid4vci.offers.CredentialOfferGrants" : {
+        "type" : "object",
+        "properties" : {
+          "authorization_code" : {
+            "$ref" : "#/components/schemas/id.walt.openid4vci.offers.AuthorizationCodeGrant"
+          },
+          "urn:ietf:params:oauth:grant-type:pre-authorized_code" : {
+            "$ref" : "#/components/schemas/id.walt.openid4vci.offers.PreAuthorizedCodeGrant"
+          }
+        },
+        "title" : "CredentialOfferGrants"
+      },
+      "id.walt.openid4vci.offers.AuthorizationCodeGrant" : {
+        "type" : "object",
+        "properties" : {
+          "issuer_state" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "authorization_server" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "title" : "AuthorizationCodeGrant"
+      },
+      "id.walt.openid4vci.offers.PreAuthorizedCodeGrant" : {
+        "type" : "object",
+        "properties" : {
+          "pre-authorized_code" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "tx_code" : {
+            "$ref" : "#/components/schemas/id.walt.openid4vci.offers.TxCode"
+          },
+          "interval" : {
+            "type" : "integer",
+            "format" : "int64",
+            "title" : "Long"
+          },
+          "authorization_server" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "pre-authorized_code" ],
+        "title" : "PreAuthorizedCodeGrant"
+      },
+      "id.walt.issuer2.domain.IssuanceSessionStatus" : {
+        "type" : "string",
+        "enum" : [ "ACTIVE", "SUCCESSFUL", "UNSUCCESSFUL", "REJECTED_BY_USER", "EXPIRED" ],
+        "title" : "IssuanceSessionStatus"
+      },
+      "id.walt.issuer2.domain.IssuanceSessionFailure" : {
+        "type" : "object",
+        "properties" : {
+          "error" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "error_description" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "error" ],
+        "title" : "IssuanceSessionFailure"
+      },
+      "id.walt.issuer2.models.SingleIssuanceSession" : {
+        "type" : "object",
+        "properties" : {
+          "sessionId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "authenticationMethod" : {
+            "$ref" : "#/components/schemas/id.walt.openid4vci.offers.AuthenticationMethod"
+          },
+          "credentialOffer" : {
+            "$ref" : "#/components/schemas/id.walt.openid4vci.offers.CredentialOffer"
+          },
+          "authorizationRequest" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string",
+                "title" : "String"
+              },
+              "title" : "ArrayList<String>"
+            },
+            "title" : "LinkedHashMap<String,ArrayList<String>>"
+          },
+          "externalAuthorizationState" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "authorizationClaims" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "expiresAt" : {
+            "type" : "string",
+            "format" : "date-time",
+            "title" : "Instant"
+          },
+          "status" : {
+            "$ref" : "#/components/schemas/id.walt.issuer2.domain.IssuanceSessionStatus"
+          },
+          "statusReason" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "notifications" : {
+            "$ref" : "#/components/schemas/id.walt.issuer2.notifications.IssuanceNotifications"
+          },
+          "isClosed" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "failure" : {
+            "$ref" : "#/components/schemas/id.walt.issuer2.domain.IssuanceSessionFailure"
+          },
+          "profileId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "credentialConfigurationId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "issuerKey" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "expectedCredentialProofKeyJwks" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+            },
+            "title" : "ArrayList<JsonObject>"
+          },
+          "credentialData" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "mapping" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "selectiveDisclosure" : {
+            "$ref" : "#/components/schemas/id.walt.sdjwt.SDMap"
+          },
+          "idTokenClaimsMapping" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "LinkedHashMap<String,String>"
+          },
+          "mDocNameSpacesDataMappingConfig" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "$ref" : "#/components/schemas/object"
+            },
+            "title" : "LinkedHashMap<String,>"
+          },
+          "authorizedTransactionDataTypes" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "msoData" : {
+            "$ref" : "#/components/schemas/MsoData"
+          },
+          "x5Chain" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "issuerDid" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "credentialStatus" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonElement"
+          },
+          "expectedCredentialProofKeyJwk" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "issuedCredentialFormat" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "authenticationMethod", "credentialConfigurationId", "credentialData", "expiresAt", "isClosed", "issuerKey", "profileId", "sessionId", "status" ],
+        "title" : "SingleIssuanceSession"
+      },
+      "id.walt.issuer2.domain.IssuanceRequest" : {
+        "type" : "object",
+        "properties" : {
+          "credentialIdentifier" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "profileId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "credentialConfigurationId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "issuerKey" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "expectedCredentialProofKeyJwks" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+            },
+            "title" : "ArrayList<JsonObject>"
+          },
+          "credentialData" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "mapping" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "selectiveDisclosure" : {
+            "$ref" : "#/components/schemas/id.walt.sdjwt.SDMap"
+          },
+          "idTokenClaimsMapping" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "LinkedHashMap<String,String>"
+          },
+          "mDocNameSpacesDataMappingConfig" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "$ref" : "#/components/schemas/object"
+            },
+            "title" : "LinkedHashMap<String,>"
+          },
+          "authorizedTransactionDataTypes" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "msoData" : {
+            "$ref" : "#/components/schemas/MsoData"
+          },
+          "x5Chain" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "issuerDid" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "credentialStatus" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonElement"
+          }
+        },
+        "required" : [ "credentialConfigurationId", "credentialData", "credentialIdentifier", "issuerKey", "profileId" ],
+        "title" : "IssuanceRequest"
+      },
+      "id.walt.issuer2.domain.IssuanceResult" : {
+        "type" : "object",
+        "properties" : {
+          "issuedCredentialFormat" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "issuedCredentialFormat" ],
+        "title" : "IssuanceResult"
+      },
+      "id.walt.issuer2.domain.IssuanceSession" : {
+        "type" : "object",
+        "properties" : {
+          "sessionId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "authenticationMethod" : {
+            "$ref" : "#/components/schemas/id.walt.openid4vci.offers.AuthenticationMethod"
+          },
+          "issuanceRequests" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.issuer2.domain.IssuanceRequest"
+            },
+            "title" : "ArrayList<IssuanceRequest>"
+          },
+          "issuanceResults" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "$ref" : "#/components/schemas/id.walt.issuer2.domain.IssuanceResult"
+            },
+            "title" : "LinkedHashMap<String,IssuanceResult>"
+          },
+          "credentialOffer" : {
+            "$ref" : "#/components/schemas/id.walt.openid4vci.offers.CredentialOffer"
+          },
+          "authorizationRequest" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string",
+                "title" : "String"
+              },
+              "title" : "ArrayList<String>"
+            },
+            "title" : "LinkedHashMap<String,ArrayList<String>>"
+          },
+          "externalAuthorizationState" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "authorizationClaims" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "expiresAt" : {
+            "type" : "string",
+            "format" : "date-time",
+            "title" : "Instant"
+          },
+          "status" : {
+            "$ref" : "#/components/schemas/id.walt.issuer2.domain.IssuanceSessionStatus"
+          },
+          "statusReason" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "notifications" : {
+            "$ref" : "#/components/schemas/id.walt.issuer2.notifications.IssuanceNotifications"
+          },
+          "isClosed" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "failure" : {
+            "$ref" : "#/components/schemas/id.walt.issuer2.domain.IssuanceSessionFailure"
+          },
+          "authorizedCredentialIdentifiers" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          }
+        },
+        "required" : [ "authenticationMethod", "expiresAt", "isClosed", "issuanceRequests", "issuanceResults", "sessionId", "status" ],
+        "title" : "IssuanceSession"
+      },
+      "id.walt.openid4vci.responses.par.PushedAuthorizationResponse" : {
+        "type" : "object",
+        "properties" : {
+          "request_uri" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "expires_in" : {
+            "type" : "integer",
+            "format" : "int32",
+            "title" : "Int"
+          }
+        },
+        "required" : [ "expires_in", "request_uri" ],
+        "title" : "PushedAuthorizationResponse"
+      },
+      "id.walt.openid4vci.errors.OAuthError" : {
+        "type" : "object",
+        "properties" : {
+          "error" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "error_description" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "error" ],
+        "title" : "OAuthError"
+      },
+      "id.walt.openid4vci.errors.CredentialError" : {
+        "type" : "object",
+        "properties" : {
+          "error" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "error_description" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "error" ],
+        "title" : "CredentialError"
+      }
+    },
+    "examples" : { }
+  },
+  "webhooks" : { }
+}

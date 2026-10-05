@@ -1,0 +1,4629 @@
+{
+  "openapi" : "3.1.0",
+  "info" : {
+    "title" : "walt.id verifier",
+    "description" : "Interact with the walt.id verifier. Version is reported to be 1.1.1 and this service instance was started 2026-10-03T13:45:47Z.<br/>Questions about anything here? Visit <a href='https://walt.id/community'>support</a>.<br/>",
+    "contact" : {
+      "name" : "walt.id",
+      "url" : "https://walt.id",
+      "email" : "office@walt.id"
+    },
+    "license" : {
+      "name" : "Apache 2.0",
+      "url" : "https://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version" : "1.1.1"
+  },
+  "externalDocs" : {
+    "description" : "docs.walt.id",
+    "url" : "https://docs.walt.id"
+  },
+  "servers" : [ {
+    "url" : "/",
+    "description" : "Development Server"
+  } ],
+  "tags" : [ ],
+  "paths" : {
+    "/features/registered" : {
+      "get" : {
+        "tags" : [ "Feature management" ],
+        "summary" : "List registered features",
+        "description" : "Lists every feature flag registered by this service instance, regardless of its current state.\nThe response is an object whose keys are stable feature identifiers and whose values are\nhuman-readable descriptions. Use it to discover valid identifiers before changing\n`enabledFeatures` or `disabledFeatures` in feature configuration.\n\nThis endpoint is intentionally public and requires no authentication. It exposes feature names\nand descriptions, but never feature configuration values or secrets. Feature descriptions must\ntherefore not contain sensitive information.",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "All feature identifiers registered by this service and their descriptions",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "additionalProperties" : {
+                    "type" : "string",
+                    "title" : "String"
+                  },
+                  "title" : "LinkedHashMap<String,String>"
+                },
+                "examples" : {
+                  "Registered feature catalog" : {
+                    "value" : {
+                      "web" : "Web service",
+                      "openapi" : "Enables openapi endpoints",
+                      "persistence" : "Storage"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/features/state" : {
+      "get" : {
+        "tags" : [ "Feature management" ],
+        "summary" : "Show feature states",
+        "description" : "Shows how every registered feature is resolved at runtime. The three buckets are mutually\nexclusive:\n\n- `enabled`: features successfully enabled during startup. This includes base features,\n  explicitly enabled features, and features whose declared default is enabled.\n- `disabled`: features explicitly listed in `disabledFeatures` configuration.\n- `defaultedDisabled`: features that were not explicitly configured and whose declared default\n  is disabled.\n\nEach bucket contains `features`, a map from stable feature identifiers to human-readable\ndescriptions, and `total`, the number of entries in that map. There is intentionally no\n`defaultedEnabled` bucket: default-enabled features are activated during startup and reported\nunder `enabled`.\n\nThis endpoint is intentionally public and requires no authentication. It is intended for\ndiagnostics and exposes the service's feature posture, so deployments should account for that\noperational metadata exposure. It does not expose configuration values or secrets and must not\nbe used as an authorization decision point.",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "Runtime state of every registered feature",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.commons.web.modules.FeatureFlagInformationModule.FeatureFlagInformations"
+                },
+                "examples" : {
+                  "Feature state buckets" : {
+                    "value" : {
+                      "enabled" : {
+                        "features" : {
+                          "web" : "Web service",
+                          "openapi" : "Enables openapi endpoints"
+                        },
+                        "total" : 2
+                      },
+                      "disabled" : {
+                        "features" : {
+                          "debug-endpoints" : "Enables various debug endpoints"
+                        },
+                        "total" : 1
+                      },
+                      "defaultedDisabled" : {
+                        "features" : {
+                          "persistence" : "Storage"
+                        },
+                        "total" : 1
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/livez" : {
+      "get" : {
+        "tags" : [ ],
+        "parameters" : [ ],
+        "responses" : { },
+        "deprecated" : false
+      }
+    },
+    "/verification-session/create" : {
+      "post" : {
+        "tags" : [ "Verification Session Management" ],
+        "summary" : "Create new verification session",
+        "description" : "Creates a new verification session with a DCQL query specifying which credentials and claims are required, along with optional verification policies.\n\n**Use Cases:**\n- Request identity credentials from wallet holders\n- Verify specific claims from verifiable credentials\n- Apply verification policies (signature validation, revocation checks, status list validation)\n- Support multiple credential formats (JWT VC, SD-JWT VC, ISO mDoc)\n\n**Important Notes:**\n- Returns both bootstrap and full authorization request URLs for wallet interaction\n- Supports multiple verification policies including signature, revocation, status list, and VICAL validation\n- DCQL query allows requesting specific claims from credentials using JSON path notation\n- Sessions expire after 10 minutes if unused and are retained for 10 years by default\n- Session status can be tracked via SSE events endpoint\n\nFor more information, see: <a href='https://docs.walt.id/enterprise-stack/services/verifier2-service/overview'>the docs</a>",
+        "parameters" : [ {
+          "name" : "X-Request-Id",
+          "in" : "header",
+          "description" : "Optional request ID for tracing",
+          "required" : false,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "Verification session setup with DCQL query and optional policies",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/id.walt.verifier2.data.VerificationSessionSetup"
+              },
+              "examples" : {
+                "[openid4vp-http][w3c vc] default jwt_vc_json" : {
+                  "value" : {
+                    "flow_type" : "cross_device",
+                    "core_flow" : {
+                      "dcql_query" : {
+                        "credentials" : [ {
+                          "id" : "example_openbadge_jwt_vc",
+                          "format" : "jwt_vc_json",
+                          "meta" : {
+                            "type_values" : [ [ "VerifiableCredential", "OpenBadgeCredential" ] ]
+                          },
+                          "claims" : [ {
+                            "path" : [ "name" ]
+                          } ]
+                        } ]
+                      }
+                    }
+                  }
+                },
+                "[openid4vp-http][w3c vc] basic w3c policies (signature, expiration, not-before, allowed-issuer, regex)" : {
+                  "value" : {
+                    "flow_type" : "cross_device",
+                    "core_flow" : {
+                      "dcql_query" : {
+                        "credentials" : [ {
+                          "id" : "example_openbadge_jwt_vc",
+                          "format" : "jwt_vc_json",
+                          "meta" : {
+                            "type_values" : [ [ "VerifiableCredential", "OpenBadgeCredential" ] ]
+                          },
+                          "claims" : [ {
+                            "path" : [ "name" ]
+                          } ]
+                        } ]
+                      },
+                      "policies" : {
+                        "vc_policies" : [ {
+                          "policy" : "signature"
+                        }, {
+                          "policy" : "expiration"
+                        }, {
+                          "policy" : "not-before"
+                        }, {
+                          "policy" : "allowed-issuer",
+                          "allowed_issuer" : [ "https://university.example/issuers/565049" ]
+                        }, {
+                          "policy" : "regex",
+                          "path" : "$.credentialSubject.degree.name",
+                          "regex" : "^Bachelor of Science and Arts$"
+                        } ]
+                      }
+                    }
+                  }
+                },
+                "[openid4vp-http][w3c vc] credential status for BitstringStatusList" : {
+                  "value" : {
+                    "flow_type" : "cross_device",
+                    "core_flow" : {
+                      "dcql_query" : {
+                        "credentials" : [ {
+                          "id" : "example_openbadge_jwt_vc",
+                          "format" : "jwt_vc_json",
+                          "meta" : {
+                            "type_values" : [ [ "VerifiableCredential", "OpenBadgeCredential" ] ]
+                          },
+                          "claims" : [ {
+                            "path" : [ "name" ]
+                          } ]
+                        } ]
+                      },
+                      "policies" : {
+                        "vc_policies" : [ {
+                          "policy" : "credential-status",
+                          "argument" : {
+                            "discriminator" : "w3c",
+                            "value" : 0,
+                            "purpose" : "Revocation",
+                            "type" : "BitstringStatusList"
+                          }
+                        } ]
+                      }
+                    }
+                  }
+                },
+                "[openid4vp-http][w3c vc] credential status for BitstringStatusList (multiple allowed values)" : {
+                  "value" : {
+                    "flow_type" : "cross_device",
+                    "core_flow" : {
+                      "dcql_query" : {
+                        "credentials" : [ {
+                          "id" : "example_openbadge_jwt_vc",
+                          "format" : "jwt_vc_json",
+                          "meta" : {
+                            "type_values" : [ [ "VerifiableCredential", "OpenBadgeCredential" ] ]
+                          },
+                          "claims" : [ {
+                            "path" : [ "name" ]
+                          } ]
+                        } ]
+                      },
+                      "policies" : {
+                        "vc_policies" : [ {
+                          "policy" : "credential-status",
+                          "argument" : {
+                            "discriminator" : "w3c",
+                            "values" : [ 0, 1 ],
+                            "purpose" : "Revocation",
+                            "type" : "BitstringStatusList"
+                          }
+                        } ]
+                      }
+                    }
+                  }
+                },
+                "[openid4vp-http][w3c vc] credential status for multiple BitstringStatusList" : {
+                  "value" : {
+                    "flow_type" : "cross_device",
+                    "core_flow" : {
+                      "dcql_query" : {
+                        "credentials" : [ {
+                          "id" : "example_openbadge_jwt_vc",
+                          "format" : "jwt_vc_json",
+                          "meta" : {
+                            "type_values" : [ [ "VerifiableCredential", "OpenBadgeCredential" ] ]
+                          },
+                          "claims" : [ {
+                            "path" : [ "name" ]
+                          } ]
+                        } ]
+                      },
+                      "policies" : {
+                        "vc_policies" : [ {
+                          "policy" : "credential-status",
+                          "argument" : {
+                            "discriminator" : "w3c-list",
+                            "list" : [ {
+                              "value" : 0,
+                              "purpose" : "Revocation",
+                              "type" : "BitstringStatusList"
+                            }, {
+                              "value" : 0,
+                              "purpose" : "Suspension",
+                              "type" : "BitstringStatusList"
+                            } ]
+                          }
+                        } ]
+                      }
+                    }
+                  }
+                },
+                "[openid4vp-http][w3c vc] webhook" : {
+                  "value" : {
+                    "flow_type" : "cross_device",
+                    "core_flow" : {
+                      "dcql_query" : {
+                        "credentials" : [ {
+                          "id" : "example_openbadge_jwt_vc",
+                          "format" : "jwt_vc_json",
+                          "meta" : {
+                            "type_values" : [ [ "VerifiableCredential", "OpenBadgeCredential" ] ]
+                          },
+                          "claims" : [ {
+                            "path" : [ "name" ]
+                          } ]
+                        } ]
+                      },
+                      "policies" : {
+                        "vc_policies" : [ {
+                          "policy" : "webhook",
+                          "url" : "https://your-backend.com"
+                        } ]
+                      }
+                    }
+                  }
+                },
+                "[openid4vp-http][w3c vc] presentation policies (jwt_vc_json/*)" : {
+                  "value" : {
+                    "flow_type" : "cross_device",
+                    "core_flow" : {
+                      "dcql_query" : {
+                        "credentials" : [ {
+                          "id" : "example_openbadge_jwt_vc",
+                          "format" : "jwt_vc_json",
+                          "meta" : {
+                            "type_values" : [ [ "VerifiableCredential", "OpenBadgeCredential" ] ]
+                          },
+                          "claims" : [ {
+                            "path" : [ "name" ]
+                          } ]
+                        } ]
+                      },
+                      "policies" : {
+                        "vp_policies" : {
+                          "jwt_vc_json" : [ "jwt_vc_json/audience-check", "jwt_vc_json/nonce-check", "jwt_vc_json/envelope_signature" ],
+                          "dc+sd-jwt" : [ ],
+                          "mso_mdoc" : [ ]
+                        }
+                      }
+                    }
+                  }
+                },
+                "[openid4vp-http][w3c vc] DCQL: W3C credential with path-based claims" : {
+                  "value" : {
+                    "flow_type" : "cross_device",
+                    "core_flow" : {
+                      "dcql_query" : {
+                        "credentials" : [ {
+                          "id" : "example_openbadge_jwt_vc",
+                          "format" : "jwt_vc_json",
+                          "meta" : {
+                            "type_values" : [ [ "VerifiableCredential", "OpenBadgeCredential" ] ]
+                          },
+                          "claims" : [ {
+                            "path" : [ "name" ]
+                          } ]
+                        } ]
+                      }
+                    }
+                  }
+                },
+                "[openid4vp-http][w3c vc] DCQL: W3C credential with empty meta" : {
+                  "value" : {
+                    "flow_type" : "cross_device",
+                    "core_flow" : {
+                      "dcql_query" : {
+                        "credentials" : [ {
+                          "id" : "example_openbadge_jwt_vc",
+                          "format" : "jwt_vc_json",
+                          "meta" : { },
+                          "claims" : [ {
+                            "path" : [ "name" ]
+                          } ]
+                        } ]
+                      }
+                    }
+                  }
+                },
+                "[openid4vp-http][w3c vc] DCQL: Nested presentation request for W3C credentials" : {
+                  "value" : {
+                    "flow_type" : "cross_device",
+                    "core_flow" : {
+                      "dcql_query" : {
+                        "credentials" : [ {
+                          "id" : "example_openbadge_jwt_vc",
+                          "format" : "jwt_vc_json",
+                          "meta" : {
+                            "type_values" : [ [ "VerifiableCredential", "OpenBadgeCredential" ] ]
+                          },
+                          "claims" : [ {
+                            "path" : [ "credentialSubject", "achievement", "description" ]
+                          } ]
+                        } ]
+                      }
+                    }
+                  }
+                },
+                "[openid4vp-http][w3c vc] DCQL: Nested presentation request with multiple claims" : {
+                  "value" : {
+                    "flow_type" : "cross_device",
+                    "core_flow" : {
+                      "dcql_query" : {
+                        "credentials" : [ {
+                          "id" : "example_openbadge_jwt_vc",
+                          "format" : "jwt_vc_json",
+                          "meta" : {
+                            "type_values" : [ [ "VerifiableCredential", "OpenBadgeCredential" ] ]
+                          },
+                          "claims" : [ {
+                            "path" : [ "credentialSubject", "achievement", "description" ]
+                          }, {
+                            "path" : [ "credentialSubject", "achievement", "criteria", "type" ]
+                          }, {
+                            "path" : [ "name" ]
+                          } ]
+                        } ]
+                      }
+                    }
+                  }
+                },
+                "[openid4vp-http][w3c vc] DCQL: W3C credential with type values only" : {
+                  "value" : {
+                    "flow_type" : "cross_device",
+                    "core_flow" : {
+                      "dcql_query" : {
+                        "credentials" : [ {
+                          "id" : "example_openbadge_jwt_vc",
+                          "format" : "jwt_vc_json",
+                          "meta" : {
+                            "type_values" : [ [ "OpenBadgeCredential" ] ]
+                          },
+                          "claims" : [ {
+                            "path" : [ "name" ]
+                          } ]
+                        } ]
+                      }
+                    }
+                  }
+                },
+                "[openid4vp-http][w3c vc] DCQL: W3C credential without claims" : {
+                  "value" : {
+                    "flow_type" : "cross_device",
+                    "core_flow" : {
+                      "dcql_query" : {
+                        "credentials" : [ {
+                          "id" : "example_openbadge_jwt_vc",
+                          "format" : "jwt_vc_json",
+                          "meta" : {
+                            "type_values" : [ [ "OpenBadgeCredential" ] ]
+                          }
+                        } ]
+                      }
+                    }
+                  }
+                },
+                "[openid4vp-http][w3c vc] DCQL: W3C credential with claims and value constraints" : {
+                  "value" : {
+                    "flow_type" : "cross_device",
+                    "core_flow" : {
+                      "dcql_query" : {
+                        "credentials" : [ {
+                          "id" : "example_openbadge_jwt_vc",
+                          "format" : "jwt_vc_json",
+                          "meta" : {
+                            "type_values" : [ [ "VerifiableCredential", "OpenBadgeCredential" ] ]
+                          },
+                          "claims" : [ {
+                            "path" : [ "name" ],
+                            "values" : [ "JFF x vc-edu PlugFest 3 Interoperability" ]
+                          } ]
+                        } ]
+                      }
+                    }
+                  }
+                },
+                "[openid4vp-http][ietf sd-jwt vc] default dc+sd-jwt" : {
+                  "value" : {
+                    "flow_type" : "cross_device",
+                    "core_flow" : {
+                      "dcql_query" : {
+                        "credentials" : [ {
+                          "id" : "pid",
+                          "format" : "dc+sd-jwt",
+                          "meta" : {
+                            "vct_values" : [ "http://waltid.enterprise.localhost:3000/v1/waltid.issuer/issuer-service-api/openid4vc/draft13/identity_credential" ]
+                          },
+                          "claims" : [ {
+                            "path" : [ "given_name" ]
+                          }, {
+                            "path" : [ "family_name" ]
+                          }, {
+                            "path" : [ "address", "street_address" ]
+                          } ]
+                        } ]
+                      }
+                    }
+                  }
+                },
+                "[openid4vp-http][ietf sd-jwt vc] expiration_duration" : {
+                  "value" : {
+                    "flow_type" : "cross_device",
+                    "core_flow" : {
+                      "dcql_query" : {
+                        "credentials" : [ {
+                          "id" : "pid",
+                          "format" : "dc+sd-jwt",
+                          "meta" : {
+                            "vct_values" : [ "http://waltid.enterprise.localhost:3000/v1/waltid.issuer/issuer-service-api/openid4vc/draft13/identity_credential" ]
+                          },
+                          "claims" : [ {
+                            "path" : [ "given_name" ]
+                          }, {
+                            "path" : [ "family_name" ]
+                          }, {
+                            "path" : [ "address", "street_address" ]
+                          } ]
+                        } ]
+                      },
+                      "expiration_duration" : "PT15M"
+                    }
+                  }
+                },
+                "[openid4vp-http][ietf sd-jwt vc] expiration_date" : {
+                  "value" : {
+                    "flow_type" : "cross_device",
+                    "core_flow" : {
+                      "dcql_query" : {
+                        "credentials" : [ {
+                          "id" : "pid",
+                          "format" : "dc+sd-jwt",
+                          "meta" : {
+                            "vct_values" : [ "http://waltid.enterprise.localhost:3000/v1/waltid.issuer/issuer-service-api/openid4vc/draft13/identity_credential" ]
+                          },
+                          "claims" : [ {
+                            "path" : [ "given_name" ]
+                          }, {
+                            "path" : [ "family_name" ]
+                          }, {
+                            "path" : [ "address", "street_address" ]
+                          } ]
+                        } ]
+                      },
+                      "expiration_date" : "2035-07-06T15:30:00Z"
+                    }
+                  }
+                },
+                "[openid4vp-http][ietf sd-jwt vc] basic w3c policies (signature, expiration, not-before, allowed-issuer, regex)" : {
+                  "value" : {
+                    "flow_type" : "cross_device",
+                    "core_flow" : {
+                      "dcql_query" : {
+                        "credentials" : [ {
+                          "id" : "pid",
+                          "format" : "dc+sd-jwt",
+                          "meta" : {
+                            "vct_values" : [ "http://waltid.enterprise.localhost:3000/v1/waltid.issuer/issuer-service-api/openid4vc/draft13/identity_credential" ]
+                          },
+                          "claims" : [ {
+                            "path" : [ "given_name" ]
+                          }, {
+                            "path" : [ "family_name" ]
+                          }, {
+                            "path" : [ "address", "street_address" ]
+                          } ]
+                        } ]
+                      },
+                      "policies" : {
+                        "vc_policies" : [ {
+                          "policy" : "signature"
+                        }, {
+                          "policy" : "expiration"
+                        }, {
+                          "policy" : "not-before"
+                        }, {
+                          "policy" : "allowed-issuer",
+                          "allowed_issuer" : [ "https://university.example/issuers/565049" ]
+                        }, {
+                          "policy" : "regex",
+                          "path" : "$.credentialSubject.degree.name",
+                          "regex" : "^Bachelor of Science and Arts$"
+                        } ]
+                      }
+                    }
+                  }
+                },
+                "[openid4vp-http][ietf sd-jwt vc] presentation policies (dc+sd-jwt/*)" : {
+                  "value" : {
+                    "flow_type" : "cross_device",
+                    "core_flow" : {
+                      "dcql_query" : {
+                        "credentials" : [ {
+                          "id" : "pid",
+                          "format" : "dc+sd-jwt",
+                          "meta" : {
+                            "vct_values" : [ "http://waltid.enterprise.localhost:3000/v1/waltid.issuer/issuer-service-api/openid4vc/draft13/identity_credential" ]
+                          },
+                          "claims" : [ {
+                            "path" : [ "given_name" ]
+                          }, {
+                            "path" : [ "family_name" ]
+                          }, {
+                            "path" : [ "address", "street_address" ]
+                          } ]
+                        } ]
+                      },
+                      "policies" : {
+                        "vp_policies" : {
+                          "jwt_vc_json" : [ ],
+                          "dc+sd-jwt" : [ "dc+sd-jwt/audience-check", "dc+sd-jwt/kb-jwt_signature", "dc+sd-jwt/nonce-check", "dc+sd-jwt/sd_hash-check" ],
+                          "mso_mdoc" : [ ]
+                        }
+                      }
+                    }
+                  }
+                },
+                "[openid4vp-http][ietf sd-jwt vc] transaction_data payment authorization" : {
+                  "value" : {
+                    "flow_type" : "cross_device",
+                    "core_flow" : {
+                      "dcql_query" : {
+                        "credentials" : [ {
+                          "id" : "pid",
+                          "format" : "dc+sd-jwt",
+                          "meta" : {
+                            "vct_values" : [ "http://waltid.enterprise.localhost:3000/v1/waltid.issuer/issuer-service-api/openid4vc/draft13/identity_credential" ]
+                          },
+                          "claims" : [ {
+                            "path" : [ "given_name" ]
+                          }, {
+                            "path" : [ "family_name" ]
+                          } ]
+                        } ]
+                      }
+                    },
+                    "openid" : {
+                      "transactionData" : [ {
+                        "type" : "org.waltid.transaction-data.payment-authorization",
+                        "credential_ids" : [ "pid" ],
+                        "require_cryptographic_holder_binding" : true,
+                        "transaction_data_hashes_alg" : [ "sha-256" ],
+                        "amount" : "42.00",
+                        "currency" : "EUR",
+                        "payee" : "ACME Corp",
+                        "reference" : "INV-2026-042"
+                      } ]
+                    }
+                  }
+                },
+                "[openid4vp-http][sd-jwt pid]" : {
+                  "value" : {
+                    "flow_type" : "cross_device",
+                    "core_flow" : {
+                      "dcql_query" : {
+                        "credentials" : [ {
+                          "id" : "pid",
+                          "format" : "dc+sd-jwt",
+                          "meta" : {
+                            "vct_values" : [ "https://credentials.example.com/identity_credential" ]
+                          },
+                          "claims" : [ {
+                            "path" : [ "given_name" ]
+                          }, {
+                            "path" : [ "family_name" ]
+                          }, {
+                            "path" : [ "address", "street_address" ]
+                          } ]
+                        } ]
+                      }
+                    },
+                    "redirects" : {
+                      "success_redirect_uri" : "https://example.com/success",
+                      "error_redirect_uri" : "https://example.com/not-successful"
+                    }
+                  }
+                },
+                "[openid4vp-http][iso pid]" : {
+                  "value" : {
+                    "flow_type" : "cross_device",
+                    "core_flow" : {
+                      "dcql_query" : {
+                        "credentials" : [ {
+                          "id" : "pid",
+                          "format" : "mso_mdoc",
+                          "meta" : {
+                            "doctype_value" : "eu.europa.ec.eudi.pid.1"
+                          },
+                          "claims" : [ {
+                            "path" : [ "eu.europa.ec.eudi.pid.1", "family_name" ]
+                          }, {
+                            "path" : [ "eu.europa.ec.eudi.pid.1", "given_name" ]
+                          }, {
+                            "path" : [ "eu.europa.ec.eudi.pid.1", "birth_date" ]
+                          }, {
+                            "path" : [ "eu.europa.ec.eudi.pid.1", "age_birth_year" ]
+                          }, {
+                            "path" : [ "eu.europa.ec.eudi.pid.1", "age_over_18" ]
+                          }, {
+                            "path" : [ "eu.europa.ec.eudi.pid.1", "age_over_21" ]
+                          }, {
+                            "path" : [ "eu.europa.ec.eudi.pid.1", "family_name_birth" ]
+                          }, {
+                            "path" : [ "eu.europa.ec.eudi.pid.1", "given_name_birth" ]
+                          }, {
+                            "path" : [ "eu.europa.ec.eudi.pid.1", "birth_place" ]
+                          }, {
+                            "path" : [ "eu.europa.ec.eudi.pid.1", "birth_country" ]
+                          }, {
+                            "path" : [ "eu.europa.ec.eudi.pid.1", "issuance_date" ]
+                          }, {
+                            "path" : [ "eu.europa.ec.eudi.pid.1", "expiry_date" ]
+                          }, {
+                            "path" : [ "eu.europa.ec.eudi.pid.1", "issuing_authority" ]
+                          }, {
+                            "path" : [ "eu.europa.ec.eudi.pid.1", "issuing_country" ]
+                          } ]
+                        } ]
+                      }
+                    },
+                    "redirects" : {
+                      "success_redirect_uri" : "https://example.com/success",
+                      "error_redirect_uri" : "https://example.com/not-successful"
+                    }
+                  }
+                },
+                "[openid4vp-http][sd-jwt or iso pid]" : {
+                  "value" : {
+                    "flow_type" : "cross_device",
+                    "core_flow" : {
+                      "dcql_query" : {
+                        "credentials" : [ {
+                          "id" : "sdjwt_pid",
+                          "format" : "dc+sd-jwt",
+                          "meta" : {
+                            "vct_values" : [ "eu.europa.ec.eudi.pid.1", "urn:eudi:pid:1" ]
+                          },
+                          "claims" : [ {
+                            "id" : "family_name",
+                            "path" : [ "family_name" ]
+                          }, {
+                            "id" : "given_name",
+                            "path" : [ "given_name" ]
+                          }, {
+                            "id" : "birth_date",
+                            "path" : [ "birth_date" ]
+                          }, {
+                            "id" : "age_over_18",
+                            "path" : [ "age_over_18" ]
+                          }, {
+                            "id" : "issuing_country",
+                            "path" : [ "issuing_country" ]
+                          } ]
+                        }, {
+                          "id" : "iso_pid",
+                          "format" : "mso_mdoc",
+                          "meta" : {
+                            "doctype_value" : "eu.europa.ec.eudi.pid.1"
+                          },
+                          "claims" : [ {
+                            "id" : "family_name",
+                            "path" : [ "eu.europa.ec.eudi.pid.1", "family_name" ]
+                          }, {
+                            "id" : "given_name",
+                            "path" : [ "eu.europa.ec.eudi.pid.1", "given_name" ]
+                          }, {
+                            "id" : "birth_date",
+                            "path" : [ "eu.europa.ec.eudi.pid.1", "birth_date" ]
+                          }, {
+                            "id" : "age_over_18",
+                            "path" : [ "eu.europa.ec.eudi.pid.1", "age_over_18" ]
+                          }, {
+                            "id" : "issuing_country",
+                            "path" : [ "eu.europa.ec.eudi.pid.1", "issuing_country" ]
+                          } ]
+                        } ],
+                        "credential_sets" : [ {
+                          "options" : [ [ "sdjwt_pid" ], [ "iso_pid" ] ]
+                        } ]
+                      }
+                    },
+                    "redirects" : {
+                      "success_redirect_uri" : "https://example.com/success",
+                      "error_redirect_uri" : "https://example.com/not-successful"
+                    }
+                  }
+                },
+                "[openid4vp-http][iso mdl & photo-id]" : {
+                  "value" : {
+                    "flow_type" : "cross_device",
+                    "core_flow" : {
+                      "dcql_query" : {
+                        "credentials" : [ {
+                          "id" : "mdl-id",
+                          "format" : "mso_mdoc",
+                          "meta" : {
+                            "doctype_value" : "org.iso.18013.5.1.mDL"
+                          },
+                          "claims" : [ {
+                            "id" : "given_name",
+                            "path" : [ "org.iso.18013.5.1", "given_name" ]
+                          }, {
+                            "id" : "family_name",
+                            "path" : [ "org.iso.18013.5.1", "family_name" ]
+                          }, {
+                            "id" : "portrait",
+                            "path" : [ "org.iso.18013.5.1", "portrait" ]
+                          } ]
+                        }, {
+                          "id" : "mdl-address",
+                          "format" : "mso_mdoc",
+                          "meta" : {
+                            "doctype_value" : "org.iso.18013.5.1.mDL"
+                          },
+                          "claims" : [ {
+                            "id" : "resident_address",
+                            "path" : [ "org.iso.18013.5.1", "resident_address" ]
+                          }, {
+                            "id" : "resident_country",
+                            "path" : [ "org.iso.18013.5.1", "resident_country" ]
+                          } ]
+                        }, {
+                          "id" : "photo_card-id",
+                          "format" : "mso_mdoc",
+                          "meta" : {
+                            "doctype_value" : "org.iso.23220.photoid.1"
+                          },
+                          "claims" : [ {
+                            "id" : "given_name",
+                            "path" : [ "org.iso.23220.photoid.1", "given_name" ]
+                          }, {
+                            "id" : "family_name",
+                            "path" : [ "org.iso.23220.photoid.1", "family_name" ]
+                          }, {
+                            "id" : "portrait",
+                            "path" : [ "org.iso.23220.photoid.1", "portrait" ]
+                          } ]
+                        }, {
+                          "id" : "photo_card-address",
+                          "format" : "mso_mdoc",
+                          "meta" : {
+                            "doctype_value" : "org.iso.23220.photoid.1"
+                          },
+                          "claims" : [ {
+                            "id" : "resident_address",
+                            "path" : [ "org.iso.23220.photoid.1", "resident_address" ]
+                          }, {
+                            "id" : "resident_country",
+                            "path" : [ "org.iso.23220.photoid.1", "resident_country" ]
+                          } ]
+                        } ],
+                        "credential_sets" : [ {
+                          "options" : [ [ "mdl-id" ], [ "photo_card-id" ] ]
+                        }, {
+                          "options" : [ [ "mdl-address" ], [ "photo_card-address" ] ],
+                          "required" : false
+                        } ]
+                      }
+                    },
+                    "redirects" : {
+                      "success_redirect_uri" : "https://example.com/success",
+                      "error_redirect_uri" : "https://example.com/not-successful"
+                    }
+                  }
+                },
+                "[openid4vp-http][iso mdl] credential status for TokenStatusList" : {
+                  "value" : {
+                    "flow_type" : "cross_device",
+                    "core_flow" : {
+                      "dcql_query" : {
+                        "credentials" : [ {
+                          "id" : "example_mdl",
+                          "format" : "mso_mdoc",
+                          "meta" : {
+                            "doctype_value" : "org.iso.18013.5.1.mDL"
+                          },
+                          "claims" : [ {
+                            "path" : [ "org.iso.18013.5.1", "family_name" ]
+                          }, {
+                            "path" : [ "org.iso.18013.5.1", "given_name" ]
+                          } ]
+                        } ]
+                      },
+                      "policies" : {
+                        "vc_policies" : [ {
+                          "policy" : "credential-status",
+                          "argument" : {
+                            "discriminator" : "ietf",
+                            "value" : 0
+                          }
+                        } ]
+                      }
+                    }
+                  }
+                },
+                "[openid4vp-http][iso mdl] credential status for TokenStatusList (multiple allowed values)" : {
+                  "value" : {
+                    "flow_type" : "cross_device",
+                    "core_flow" : {
+                      "dcql_query" : {
+                        "credentials" : [ {
+                          "id" : "example_mdl",
+                          "format" : "mso_mdoc",
+                          "meta" : {
+                            "doctype_value" : "org.iso.18013.5.1.mDL"
+                          },
+                          "claims" : [ {
+                            "path" : [ "org.iso.18013.5.1", "family_name" ]
+                          }, {
+                            "path" : [ "org.iso.18013.5.1", "given_name" ]
+                          } ]
+                        } ]
+                      },
+                      "policies" : {
+                        "vc_policies" : [ {
+                          "policy" : "credential-status",
+                          "argument" : {
+                            "discriminator" : "ietf",
+                            "values" : [ 0, 1 ]
+                          }
+                        } ]
+                      }
+                    }
+                  }
+                },
+                "[openid4vp-http][iso photo-id] vical" : {
+                  "value" : {
+                    "flow_type" : "cross_device",
+                    "core_flow" : {
+                      "dcql_query" : {
+                        "credentials" : [ {
+                          "id" : "my_photoid",
+                          "format" : "mso_mdoc",
+                          "meta" : {
+                            "doctype_value" : "org.iso.23220.photoid.1"
+                          },
+                          "claims" : [ {
+                            "path" : [ "org.iso.18013.5.1", "family_name_unicode" ]
+                          }, {
+                            "path" : [ "org.iso.18013.5.1", "given_name_unicode" ]
+                          }, {
+                            "path" : [ "org.iso.18013.5.1", "issuing_authority_unicode" ]
+                          }, {
+                            "path" : [ "org.iso.18013.5.1", "resident_postal_code" ],
+                            "values" : [ 1180, 1190, 1200, 1210 ]
+                          }, {
+                            "path" : [ "org.iso.18013.5.1", "issuing_country" ],
+                            "values" : [ "AT" ]
+                          }, {
+                            "path" : [ "org.iso.23220.photoid.1", "person_id" ]
+                          }, {
+                            "path" : [ "org.iso.23220.photoid.1", "resident_street" ]
+                          }, {
+                            "path" : [ "org.iso.23220.photoid.1", "administrative_number" ]
+                          }, {
+                            "path" : [ "org.iso.23220.photoid.1", "travel_document_number" ]
+                          }, {
+                            "path" : [ "org.iso.23220.dtc.1", "dtc_version" ]
+                          }, {
+                            "path" : [ "org.iso.23220.dtc.1", "dtc_dg1" ]
+                          } ]
+                        } ]
+                      },
+                      "policies" : {
+                        "vc_policies" : [ {
+                          "policy" : "signature"
+                        }, {
+                          "policy" : "vical",
+                          "vical" : "<base64 encoded VICAL file>",
+                          "enableDocumentTypeValidation" : true
+                        } ]
+                      }
+                    }
+                  }
+                },
+                "[openid4vp-dc_api][iso mdl] unsigned & unencrypted" : {
+                  "value" : {
+                    "flow_type" : "dc_api_openid4vp",
+                    "core_flow" : {
+                      "dcql_query" : {
+                        "credentials" : [ {
+                          "id" : "my_mdl",
+                          "format" : "mso_mdoc",
+                          "meta" : {
+                            "doctype_value" : "org.iso.18013.5.1.mDL"
+                          },
+                          "claims" : [ {
+                            "path" : [ "org.iso.18013.5.1", "family_name" ]
+                          }, {
+                            "path" : [ "org.iso.18013.5.1", "given_name" ]
+                          }, {
+                            "path" : [ "org.iso.18013.5.1", "age_over_21" ]
+                          } ]
+                        } ]
+                      },
+                      "clientId" : "x509_hash:OPpTDyXlg6WRu2-Qn4rpQcA9uVqSrNExCS8kCYUe09A",
+                      "key" : {
+                        "type" : "jwk",
+                        "jwk" : {
+                          "kty" : "EC",
+                          "d" : "AEb4k1BeTR9xt2NxYZggdzkFLLUkhyyWvyUOq3qSiwA",
+                          "crv" : "P-256",
+                          "kid" : "_nd-T2YRYLSmuKkJZlRI641zrCIJLTpiHeqMwXuvdug",
+                          "x" : "G_TgBc0BkmMipiQ_6gkamIn3mmp7hcTrZuyrLTmknP0",
+                          "y" : "VkRMZdXYXSMff5AJLrnHiN0x5MV6u_8vrAcytGUe4z4"
+                        }
+                      }
+                    },
+                    "expectedOrigins" : [ "https://portal2.demo.walt.id" ]
+                  }
+                },
+                "[openid4vp-dc_api][iso mdl] unsigned & encrypted" : {
+                  "value" : {
+                    "flow_type" : "dc_api_openid4vp",
+                    "core_flow" : {
+                      "dcql_query" : {
+                        "credentials" : [ {
+                          "id" : "my_mdl",
+                          "format" : "mso_mdoc",
+                          "meta" : {
+                            "doctype_value" : "org.iso.18013.5.1.mDL"
+                          },
+                          "claims" : [ {
+                            "path" : [ "org.iso.18013.5.1", "family_name" ]
+                          }, {
+                            "path" : [ "org.iso.18013.5.1", "given_name" ]
+                          }, {
+                            "path" : [ "org.iso.18013.5.1", "age_over_21" ]
+                          } ]
+                        } ]
+                      },
+                      "encrypted_response" : true,
+                      "clientId" : "x509_hash:OPpTDyXlg6WRu2-Qn4rpQcA9uVqSrNExCS8kCYUe09A",
+                      "key" : {
+                        "type" : "jwk",
+                        "jwk" : {
+                          "kty" : "EC",
+                          "d" : "AEb4k1BeTR9xt2NxYZggdzkFLLUkhyyWvyUOq3qSiwA",
+                          "crv" : "P-256",
+                          "kid" : "_nd-T2YRYLSmuKkJZlRI641zrCIJLTpiHeqMwXuvdug",
+                          "x" : "G_TgBc0BkmMipiQ_6gkamIn3mmp7hcTrZuyrLTmknP0",
+                          "y" : "VkRMZdXYXSMff5AJLrnHiN0x5MV6u_8vrAcytGUe4z4"
+                        }
+                      }
+                    },
+                    "expectedOrigins" : [ "https://portal2.demo.walt.id" ]
+                  }
+                },
+                "[openid4vp-dc_api][iso mdl] signed & unencrypted" : {
+                  "value" : {
+                    "flow_type" : "dc_api_openid4vp",
+                    "core_flow" : {
+                      "dcql_query" : {
+                        "credentials" : [ {
+                          "id" : "my_mdl",
+                          "format" : "mso_mdoc",
+                          "meta" : {
+                            "doctype_value" : "org.iso.18013.5.1.mDL"
+                          },
+                          "claims" : [ {
+                            "path" : [ "org.iso.18013.5.1", "family_name" ]
+                          }, {
+                            "path" : [ "org.iso.18013.5.1", "given_name" ]
+                          }, {
+                            "path" : [ "org.iso.18013.5.1", "age_over_21" ]
+                          } ]
+                        } ]
+                      },
+                      "signed_request" : true,
+                      "clientId" : "x509_hash:kZ5SI3MAFaLDPRxza8xguw-o6b8LYfmP2ZvrqVSRWng",
+                      "key" : {
+                        "type" : "jwk",
+                        "jwk" : {
+                          "kty" : "EC",
+                          "crv" : "P-521",
+                          "x" : "APWg4T3FQIeJD_xQN0kap5Mzp7lJ17Ctg_T8Gy24lwOp_EIhDzBK9MoCufSIITRolWlcjFTj3Ty91C9rctTuSf0F",
+                          "y" : "AEnFDKiecuqnZ8XMKgt7dFZWRfmzPFrgQmauwlbXDC0kHCZhV76VOgCoWdzfSLegLKGn-nINAIRqPR9n2KPpQwKn",
+                          "d" : "AZT9f0qOOSMQl25qXwvFs23rq0PIUOV1R8YcG1iqRNKEYYs5k8gXNNuud4W6amuItCGWCrKSXRoHmgj6C5NUDzhA"
+                        }
+                      },
+                      "x5c" : [ "MIIB7TCCAZOgAwIBAgIUXrHFKoaAx6+CFOOHp6fZ7Rs2EzgwCgYIKoZIzj0EAwIwHTEbMBkGA1UEAwwSQ3VzdG9tSW50ZXJtZWRpYXRlMB4XDTI2MDEyMjE1NTY0OFoXDTI3MDEyMjE1NTY0OFowEzERMA8GA1UEAwwIVmVyaWZpZXIwgZswEAYHKoZIzj0CAQYFK4EEACMDgYYABAD1oOE9xUCHiQ/8UDdJGqeTM6e5SdewrYP0/BstuJcDqfxCIQ8wSvTKArn0iCE0aJVpXIxU4908vdQva3LU7kn9BQBJxQyonnLqp2fFzCoLe3RWVkX5szxa4EJmrsJW1wwtJBwmYVe+lToAqFnc30i3oCyhp/pyDQCEaj0fZ9ij6UMCp6N4MHYwDAYDVR0TAQH/BAIwADAOBgNVHQ8BAf8EBAMCB4AwFgYDVR0RBA8wDYILZXhhbXBsZS5jb20wHQYDVR0OBBYEFFAdasyU1haLdvQdEizJEaAO+cmWMB8GA1UdIwQYMBaAFGVh3m3K6y5gABHGIuD7ibTR+AG6MAoGCCqGSM49BAMCA0gAMEUCIQDT9GYMvTTyEOmKDvilHmgejcbLWQ6ACUzlmbZDk67ztAIge2kWDxRetz6xIDtnfg4vlCW6pLbdBWasMrfm1eppDww=", "MIIBlzCCAT2gAwIBAgIUZFEF4iwIsLuJO7pJ9bU7vo9Dg3kwCgYIKoZIzj0EAwIwFTETMBEGA1UEAwwKQ3VzdG9tUm9vdDAeFw0yNjAxMjIxNTU1NDJaFw0zNjAxMjAxNTU1NDJaMB0xGzAZBgNVBAMMEkN1c3RvbUludGVybWVkaWF0ZTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABAvlBFSSRWetJJSj5rvGoXtPnfw97YRHbJj4/kspQbSwxVN3RtofsSu0DevrISGx2MCPqqxHXdfSeu9SKgen6IOjYzBhMA8GA1UdEwEB/wQFMAMBAf8wDgYDVR0PAQH/BAQDAgEGMB0GA1UdDgQWBBRlYd5tyusuYAARxiLg+4m00fgBujAfBgNVHSMEGDAWgBQ+D1YkeDpF+qaxAhlnb3XSkGZWCTAKBggqhkjOPQQDAgNIADBFAiEA789kIQsGTa/GJEgYaOID9VVoO0PyeeYEwub7P0a1+ZICIHI9bYi72XTca9e8rqGJuYmKz8qEQodLvaXdgwCfQ4KZ" ]
+                    },
+                    "expectedOrigins" : [ "https://portal2.demo.walt.id" ]
+                  }
+                },
+                "[openid4vp-dc_api][iso mdl] signed & encrypted" : {
+                  "value" : {
+                    "flow_type" : "dc_api_openid4vp",
+                    "core_flow" : {
+                      "dcql_query" : {
+                        "credentials" : [ {
+                          "id" : "my_mdl",
+                          "format" : "mso_mdoc",
+                          "meta" : {
+                            "doctype_value" : "org.iso.18013.5.1.mDL"
+                          },
+                          "claims" : [ {
+                            "path" : [ "org.iso.18013.5.1", "family_name" ]
+                          }, {
+                            "path" : [ "org.iso.18013.5.1", "given_name" ]
+                          }, {
+                            "path" : [ "org.iso.18013.5.1", "age_over_21" ]
+                          } ]
+                        } ]
+                      },
+                      "signed_request" : true,
+                      "encrypted_response" : true,
+                      "clientId" : "x509_hash:kZ5SI3MAFaLDPRxza8xguw-o6b8LYfmP2ZvrqVSRWng",
+                      "key" : {
+                        "type" : "jwk",
+                        "jwk" : {
+                          "kty" : "EC",
+                          "crv" : "P-521",
+                          "x" : "APWg4T3FQIeJD_xQN0kap5Mzp7lJ17Ctg_T8Gy24lwOp_EIhDzBK9MoCufSIITRolWlcjFTj3Ty91C9rctTuSf0F",
+                          "y" : "AEnFDKiecuqnZ8XMKgt7dFZWRfmzPFrgQmauwlbXDC0kHCZhV76VOgCoWdzfSLegLKGn-nINAIRqPR9n2KPpQwKn",
+                          "d" : "AZT9f0qOOSMQl25qXwvFs23rq0PIUOV1R8YcG1iqRNKEYYs5k8gXNNuud4W6amuItCGWCrKSXRoHmgj6C5NUDzhA"
+                        }
+                      },
+                      "x5c" : [ "MIIB7TCCAZOgAwIBAgIUXrHFKoaAx6+CFOOHp6fZ7Rs2EzgwCgYIKoZIzj0EAwIwHTEbMBkGA1UEAwwSQ3VzdG9tSW50ZXJtZWRpYXRlMB4XDTI2MDEyMjE1NTY0OFoXDTI3MDEyMjE1NTY0OFowEzERMA8GA1UEAwwIVmVyaWZpZXIwgZswEAYHKoZIzj0CAQYFK4EEACMDgYYABAD1oOE9xUCHiQ/8UDdJGqeTM6e5SdewrYP0/BstuJcDqfxCIQ8wSvTKArn0iCE0aJVpXIxU4908vdQva3LU7kn9BQBJxQyonnLqp2fFzCoLe3RWVkX5szxa4EJmrsJW1wwtJBwmYVe+lToAqFnc30i3oCyhp/pyDQCEaj0fZ9ij6UMCp6N4MHYwDAYDVR0TAQH/BAIwADAOBgNVHQ8BAf8EBAMCB4AwFgYDVR0RBA8wDYILZXhhbXBsZS5jb20wHQYDVR0OBBYEFFAdasyU1haLdvQdEizJEaAO+cmWMB8GA1UdIwQYMBaAFGVh3m3K6y5gABHGIuD7ibTR+AG6MAoGCCqGSM49BAMCA0gAMEUCIQDT9GYMvTTyEOmKDvilHmgejcbLWQ6ACUzlmbZDk67ztAIge2kWDxRetz6xIDtnfg4vlCW6pLbdBWasMrfm1eppDww=", "MIIBlzCCAT2gAwIBAgIUZFEF4iwIsLuJO7pJ9bU7vo9Dg3kwCgYIKoZIzj0EAwIwFTETMBEGA1UEAwwKQ3VzdG9tUm9vdDAeFw0yNjAxMjIxNTU1NDJaFw0zNjAxMjAxNTU1NDJaMB0xGzAZBgNVBAMMEkN1c3RvbUludGVybWVkaWF0ZTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABAvlBFSSRWetJJSj5rvGoXtPnfw97YRHbJj4/kspQbSwxVN3RtofsSu0DevrISGx2MCPqqxHXdfSeu9SKgen6IOjYzBhMA8GA1UdEwEB/wQFMAMBAf8wDgYDVR0PAQH/BAQDAgEGMB0GA1UdDgQWBBRlYd5tyusuYAARxiLg+4m00fgBujAfBgNVHSMEGDAWgBQ+D1YkeDpF+qaxAhlnb3XSkGZWCTAKBggqhkjOPQQDAgNIADBFAiEA789kIQsGTa/GJEgYaOID9VVoO0PyeeYEwub7P0a1+ZICIHI9bYi72XTca9e8rqGJuYmKz8qEQodLvaXdgwCfQ4KZ" ]
+                    },
+                    "expectedOrigins" : [ "https://portal2.demo.walt.id" ]
+                  }
+                },
+                "[openid4vp-dc_api][iso photo-id] signed & encrypted" : {
+                  "value" : {
+                    "flow_type" : "dc_api_openid4vp",
+                    "core_flow" : {
+                      "dcql_query" : {
+                        "credentials" : [ {
+                          "id" : "my_photoid",
+                          "format" : "mso_mdoc",
+                          "meta" : {
+                            "doctype_value" : "org.iso.23220.photoid.1"
+                          },
+                          "claims" : [ {
+                            "path" : [ "org.iso.23220.photoid.1", "person_id" ]
+                          } ]
+                        } ]
+                      },
+                      "signed_request" : true,
+                      "encrypted_response" : true,
+                      "clientId" : "x509_hash:kZ5SI3MAFaLDPRxza8xguw-o6b8LYfmP2ZvrqVSRWng",
+                      "key" : {
+                        "type" : "jwk",
+                        "jwk" : {
+                          "kty" : "EC",
+                          "crv" : "P-521",
+                          "x" : "APWg4T3FQIeJD_xQN0kap5Mzp7lJ17Ctg_T8Gy24lwOp_EIhDzBK9MoCufSIITRolWlcjFTj3Ty91C9rctTuSf0F",
+                          "y" : "AEnFDKiecuqnZ8XMKgt7dFZWRfmzPFrgQmauwlbXDC0kHCZhV76VOgCoWdzfSLegLKGn-nINAIRqPR9n2KPpQwKn",
+                          "d" : "AZT9f0qOOSMQl25qXwvFs23rq0PIUOV1R8YcG1iqRNKEYYs5k8gXNNuud4W6amuItCGWCrKSXRoHmgj6C5NUDzhA"
+                        }
+                      },
+                      "x5c" : [ "MIIB7TCCAZOgAwIBAgIUXrHFKoaAx6+CFOOHp6fZ7Rs2EzgwCgYIKoZIzj0EAwIwHTEbMBkGA1UEAwwSQ3VzdG9tSW50ZXJtZWRpYXRlMB4XDTI2MDEyMjE1NTY0OFoXDTI3MDEyMjE1NTY0OFowEzERMA8GA1UEAwwIVmVyaWZpZXIwgZswEAYHKoZIzj0CAQYFK4EEACMDgYYABAD1oOE9xUCHiQ/8UDdJGqeTM6e5SdewrYP0/BstuJcDqfxCIQ8wSvTKArn0iCE0aJVpXIxU4908vdQva3LU7kn9BQBJxQyonnLqp2fFzCoLe3RWVkX5szxa4EJmrsJW1wwtJBwmYVe+lToAqFnc30i3oCyhp/pyDQCEaj0fZ9ij6UMCp6N4MHYwDAYDVR0TAQH/BAIwADAOBgNVHQ8BAf8EBAMCB4AwFgYDVR0RBA8wDYILZXhhbXBsZS5jb20wHQYDVR0OBBYEFFAdasyU1haLdvQdEizJEaAO+cmWMB8GA1UdIwQYMBaAFGVh3m3K6y5gABHGIuD7ibTR+AG6MAoGCCqGSM49BAMCA0gAMEUCIQDT9GYMvTTyEOmKDvilHmgejcbLWQ6ACUzlmbZDk67ztAIge2kWDxRetz6xIDtnfg4vlCW6pLbdBWasMrfm1eppDww=", "MIIBlzCCAT2gAwIBAgIUZFEF4iwIsLuJO7pJ9bU7vo9Dg3kwCgYIKoZIzj0EAwIwFTETMBEGA1UEAwwKQ3VzdG9tUm9vdDAeFw0yNjAxMjIxNTU1NDJaFw0zNjAxMjAxNTU1NDJaMB0xGzAZBgNVBAMMEkN1c3RvbUludGVybWVkaWF0ZTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABAvlBFSSRWetJJSj5rvGoXtPnfw97YRHbJj4/kspQbSwxVN3RtofsSu0DevrISGx2MCPqqxHXdfSeu9SKgen6IOjYzBhMA8GA1UdEwEB/wQFMAMBAf8wDgYDVR0PAQH/BAQDAgEGMB0GA1UdDgQWBBRlYd5tyusuYAARxiLg+4m00fgBujAfBgNVHSMEGDAWgBQ+D1YkeDpF+qaxAhlnb3XSkGZWCTAKBggqhkjOPQQDAgNIADBFAiEA789kIQsGTa/GJEgYaOID9VVoO0PyeeYEwub7P0a1+ZICIHI9bYi72XTca9e8rqGJuYmKz8qEQodLvaXdgwCfQ4KZ" ]
+                    },
+                    "expectedOrigins" : [ "https://portal2.demo.walt.id" ]
+                  }
+                },
+                "[openid4vp-dc_api][iso pid] signed & encrypted" : {
+                  "value" : {
+                    "flow_type" : "dc_api_openid4vp",
+                    "core_flow" : {
+                      "dcql_query" : {
+                        "credentials" : [ {
+                          "id" : "my_pid",
+                          "format" : "mso_mdoc",
+                          "meta" : {
+                            "doctype_value" : "eu.europa.ec.eudi.pid.1"
+                          },
+                          "claims" : [ {
+                            "path" : [ "eu.europa.ec.eudi.pid.1", "family_name" ]
+                          }, {
+                            "path" : [ "eu.europa.ec.eudi.pid.1", "given_name" ]
+                          }, {
+                            "path" : [ "eu.europa.ec.eudi.pid.1", "birth_date" ]
+                          }, {
+                            "path" : [ "eu.europa.ec.eudi.pid.1", "age_birth_year" ]
+                          }, {
+                            "path" : [ "eu.europa.ec.eudi.pid.1", "age_over_18" ]
+                          }, {
+                            "path" : [ "eu.europa.ec.eudi.pid.1", "age_over_21" ]
+                          }, {
+                            "path" : [ "eu.europa.ec.eudi.pid.1", "family_name_birth" ]
+                          }, {
+                            "path" : [ "eu.europa.ec.eudi.pid.1", "given_name_birth" ]
+                          }, {
+                            "path" : [ "eu.europa.ec.eudi.pid.1", "birth_place" ]
+                          }, {
+                            "path" : [ "eu.europa.ec.eudi.pid.1", "birth_country" ]
+                          }, {
+                            "path" : [ "eu.europa.ec.eudi.pid.1", "issuance_date" ]
+                          }, {
+                            "path" : [ "eu.europa.ec.eudi.pid.1", "expiry_date" ]
+                          }, {
+                            "path" : [ "eu.europa.ec.eudi.pid.1", "issuing_authority" ]
+                          }, {
+                            "path" : [ "eu.europa.ec.eudi.pid.1", "issuing_country" ]
+                          } ]
+                        } ]
+                      },
+                      "signed_request" : true,
+                      "encrypted_response" : true,
+                      "clientId" : "x509_hash:kZ5SI3MAFaLDPRxza8xguw-o6b8LYfmP2ZvrqVSRWng",
+                      "key" : {
+                        "type" : "jwk",
+                        "jwk" : {
+                          "kty" : "EC",
+                          "crv" : "P-521",
+                          "x" : "APWg4T3FQIeJD_xQN0kap5Mzp7lJ17Ctg_T8Gy24lwOp_EIhDzBK9MoCufSIITRolWlcjFTj3Ty91C9rctTuSf0F",
+                          "y" : "AEnFDKiecuqnZ8XMKgt7dFZWRfmzPFrgQmauwlbXDC0kHCZhV76VOgCoWdzfSLegLKGn-nINAIRqPR9n2KPpQwKn",
+                          "d" : "AZT9f0qOOSMQl25qXwvFs23rq0PIUOV1R8YcG1iqRNKEYYs5k8gXNNuud4W6amuItCGWCrKSXRoHmgj6C5NUDzhA"
+                        }
+                      },
+                      "x5c" : [ "MIIB7TCCAZOgAwIBAgIUXrHFKoaAx6+CFOOHp6fZ7Rs2EzgwCgYIKoZIzj0EAwIwHTEbMBkGA1UEAwwSQ3VzdG9tSW50ZXJtZWRpYXRlMB4XDTI2MDEyMjE1NTY0OFoXDTI3MDEyMjE1NTY0OFowEzERMA8GA1UEAwwIVmVyaWZpZXIwgZswEAYHKoZIzj0CAQYFK4EEACMDgYYABAD1oOE9xUCHiQ/8UDdJGqeTM6e5SdewrYP0/BstuJcDqfxCIQ8wSvTKArn0iCE0aJVpXIxU4908vdQva3LU7kn9BQBJxQyonnLqp2fFzCoLe3RWVkX5szxa4EJmrsJW1wwtJBwmYVe+lToAqFnc30i3oCyhp/pyDQCEaj0fZ9ij6UMCp6N4MHYwDAYDVR0TAQH/BAIwADAOBgNVHQ8BAf8EBAMCB4AwFgYDVR0RBA8wDYILZXhhbXBsZS5jb20wHQYDVR0OBBYEFFAdasyU1haLdvQdEizJEaAO+cmWMB8GA1UdIwQYMBaAFGVh3m3K6y5gABHGIuD7ibTR+AG6MAoGCCqGSM49BAMCA0gAMEUCIQDT9GYMvTTyEOmKDvilHmgejcbLWQ6ACUzlmbZDk67ztAIge2kWDxRetz6xIDtnfg4vlCW6pLbdBWasMrfm1eppDww=", "MIIBlzCCAT2gAwIBAgIUZFEF4iwIsLuJO7pJ9bU7vo9Dg3kwCgYIKoZIzj0EAwIwFTETMBEGA1UEAwwKQ3VzdG9tUm9vdDAeFw0yNjAxMjIxNTU1NDJaFw0zNjAxMjAxNTU1NDJaMB0xGzAZBgNVBAMMEkN1c3RvbUludGVybWVkaWF0ZTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABAvlBFSSRWetJJSj5rvGoXtPnfw97YRHbJj4/kspQbSwxVN3RtofsSu0DevrISGx2MCPqqxHXdfSeu9SKgen6IOjYzBhMA8GA1UdEwEB/wQFMAMBAf8wDgYDVR0PAQH/BAQDAgEGMB0GA1UdDgQWBBRlYd5tyusuYAARxiLg+4m00fgBujAfBgNVHSMEGDAWgBQ+D1YkeDpF+qaxAhlnb3XSkGZWCTAKBggqhkjOPQQDAgNIADBFAiEA789kIQsGTa/GJEgYaOID9VVoO0PyeeYEwub7P0a1+ZICIHI9bYi72XTca9e8rqGJuYmKz8qEQodLvaXdgwCfQ4KZ" ]
+                    },
+                    "expectedOrigins" : [ "https://portal2.demo.walt.id" ]
+                  }
+                },
+                "[openid4vp-dc_api][sd-jwt demo payment] urn:eudi:sca:payment:1" : {
+                  "value" : {
+                    "flow_type" : "dc_api_openid4vp",
+                    "core_flow" : {
+                      "dcql_query" : {
+                        "credentials" : [ {
+                          "id" : "sca_payment",
+                          "format" : "dc+sd-jwt",
+                          "meta" : {
+                            "vct_values" : [ "https://issuer2.demo.walt.id/openid4vci/sca_payment_card_sd_jwt" ]
+                          },
+                          "claims" : [ {
+                            "path" : [ "card_scheme" ]
+                          }, {
+                            "path" : [ "card_last4" ]
+                          }, {
+                            "path" : [ "card_holder_name" ]
+                          } ]
+                        } ]
+                      },
+                      "signed_request" : true,
+                      "encrypted_response" : true,
+                      "clientId" : "x509_san_dns:verifier.example.com"
+                    },
+                    "openid" : {
+                      "transactionData" : [ {
+                        "type" : "urn:eudi:sca:payment:1",
+                        "credential_ids" : [ "sca_payment" ],
+                        "require_cryptographic_holder_binding" : true,
+                        "transaction_data_hashes_alg" : [ "sha-256" ],
+                        "payload" : {
+                          "transaction_id" : "8D8AC610-566D-4EF0-9C22-186B2A5ED793",
+                          "payee" : {
+                            "name" : "Super Store",
+                            "id" : "merchant-001"
+                          },
+                          "currency" : "EUR",
+                          "amount" : 11.56
+                        }
+                      } ]
+                    },
+                    "expectedOrigins" : [ "https://digital-credentials.walt.id" ]
+                  }
+                },
+                "[openid4vp-dc_api][sca + age] urn:eudi:sca:payment:1" : {
+                  "value" : {
+                    "flow_type" : "dc_api_openid4vp",
+                    "core_flow" : {
+                      "dcql_query" : {
+                        "credentials" : [ {
+                          "id" : "sca_payment_card",
+                          "format" : "mso_mdoc",
+                          "meta" : {
+                            "doctype_value" : "eu.europa.ec.eudi.sca.payment_card.1"
+                          },
+                          "claims" : [ {
+                            "path" : [ "eu.europa.ec.eudi.sca.payment_card.1", "card_scheme" ]
+                          }, {
+                            "path" : [ "eu.europa.ec.eudi.sca.payment_card.1", "card_last4" ]
+                          }, {
+                            "path" : [ "eu.europa.ec.eudi.sca.payment_card.1", "pan_reference" ]
+                          }, {
+                            "path" : [ "eu.europa.ec.eudi.sca.payment_card.1", "card_holder_name" ]
+                          }, {
+                            "path" : [ "eu.europa.ec.eudi.sca.payment_card.1", "expiry_date" ]
+                          } ]
+                        }, {
+                          "id" : "proof_of_age",
+                          "format" : "mso_mdoc",
+                          "meta" : {
+                            "doctype_value" : "eu.europa.ec.av.1"
+                          },
+                          "claims" : [ {
+                            "path" : [ "eu.europa.ec.av.1", "age_over_18" ]
+                          } ]
+                        } ]
+                      }
+                    },
+                    "openid" : {
+                      "transactionData" : [ {
+                        "type" : "urn:eudi:sca:payment:1",
+                        "credential_ids" : [ "sca_payment_card" ],
+                        "require_cryptographic_holder_binding" : true,
+                        "transaction_data_hashes_alg" : [ "sha-256" ],
+                        "payload" : {
+                          "transaction_id" : "8D8AC610-566D-4EF0-9C22-186B2A5ED793",
+                          "payee" : {
+                            "name" : "Super Store",
+                            "id" : "merchant-001"
+                          },
+                          "currency" : "EUR",
+                          "amount" : 11.56
+                        }
+                      } ]
+                    },
+                    "expectedOrigins" : [ "https://digital-credentials.walt.id" ]
+                  }
+                },
+                "[iso-18013-7-dc_api][iso mdl]" : {
+                  "value" : {
+                    "flow_type" : "dc_api_18013_7",
+                    "core_flow" : {
+                      "requestedElements" : {
+                        "org.iso.18013.5.1.mDL" : {
+                          "org.iso.18013.5.1" : [ "family_name", "given_name", "birth_date", "issue_date", "expiry_date", "issuing_country", "issuing_authority", "driving_privileges", "age_birth_year", "age_over_18", "age_over_21", "age_over_65", "issuing_jurisdiction", "nationality" ]
+                        }
+                      }
+                    },
+                    "expectedOrigins" : [ "https://portal2.demo.walt.id" ]
+                  }
+                },
+                "[iso-18013-7-dc_api][iso pid]" : {
+                  "value" : {
+                    "flow_type" : "dc_api_18013_7",
+                    "core_flow" : {
+                      "requestedElements" : {
+                        "eu.europa.ec.eudi.pid.1" : {
+                          "eu.europa.ec.eudi.pid.1" : [ "family_name", "given_name", "birth_date", "age_birth_year", "age_over_18", "age_over_21", "age_over_65", "family_name_birth", "given_name_birth", "birth_place", "birth_country", "issuance_date", "expiry_date", "issuing_authority", "issuing_country" ]
+                        }
+                      }
+                    },
+                    "expectedOrigins" : [ "https://portal2.demo.walt.id" ]
+                  }
+                },
+                "[iso-18013-7-dc_api][iso photo-id]" : {
+                  "value" : {
+                    "flow_type" : "dc_api_18013_7",
+                    "core_flow" : {
+                      "requestedElements" : {
+                        "org.iso.23220.photoid.1" : {
+                          "org.iso.23220.1" : [ "family_name", "family_name_viz", "given_name", "given_name_viz", "issue_date", "expiry_date", "issuing_authority_unicode", "issuing_country", "age_over_18", "age_over_21", "age_over_65", "age_birth_year", "portrait_capture_date", "birthplace", "name_at_birth", "resident_address", "resident_city", "resident_postal_code", "resident_country", "resident_city_latin1", "nationality", "document_number", "issuing_subdivision", "family_name_latin1", "given_name_latin1" ],
+                          "org.iso.23220.photoid.1" : [ "person_id", "birth_country", "birth_state", "birth_city", "administrative_number", "resident_street", "resident_house_number", "travel_document_type", "travel_document_number", "travel_document_mrz", "resident_state" ]
+                        }
+                      }
+                    },
+                    "expectedOrigins" : [ "https://portal2.demo.walt.id" ]
+                  }
+                },
+                "[iso-18013-7-dc_api][iso mdl + photo-id]" : {
+                  "value" : {
+                    "flow_type" : "dc_api_18013_7",
+                    "core_flow" : {
+                      "requestedElements" : {
+                        "org.iso.18013.5.1.mDL" : {
+                          "org.iso.18013.5.1" : [ "family_name", "given_name", "birth_date", "issue_date", "expiry_date", "issuing_country", "issuing_authority", "driving_privileges", "age_birth_year", "age_over_18", "age_over_21", "age_over_65", "issuing_jurisdiction", "nationality" ]
+                        },
+                        "org.iso.23220.photoid.1" : {
+                          "org.iso.23220.1" : [ "family_name", "family_name_viz", "given_name", "given_name_viz", "issue_date", "expiry_date", "issuing_authority_unicode", "issuing_country", "age_over_18", "age_over_21", "age_over_65", "age_birth_year", "portrait_capture_date", "birthplace", "name_at_birth", "resident_address", "resident_city", "resident_postal_code", "resident_country", "resident_city_latin1", "nationality", "document_number", "issuing_subdivision", "family_name_latin1", "given_name_latin1" ],
+                          "org.iso.23220.photoid.1" : [ "person_id", "birth_country", "birth_state", "birth_city", "administrative_number", "resident_street", "resident_house_number", "travel_document_type", "travel_document_number", "travel_document_mrz", "resident_state" ]
+                        }
+                      }
+                    },
+                    "expectedOrigins" : [ "https://portal2.demo.walt.id" ]
+                  }
+                },
+                "[iso-18013-7-dc_api][iso mdl] signed" : {
+                  "value" : {
+                    "flow_type" : "dc_api_18013_7",
+                    "core_flow" : {
+                      "requestedElements" : {
+                        "org.iso.18013.5.1.mDL" : {
+                          "org.iso.18013.5.1" : [ "family_name", "given_name", "birth_date", "issue_date", "expiry_date", "issuing_country", "issuing_authority", "driving_privileges", "age_birth_year", "age_over_18", "age_over_21", "age_over_65", "issuing_jurisdiction", "nationality" ]
+                        }
+                      },
+                      "signed_request" : true,
+                      "clientId" : "x509_hash:1i4VjAVXdxwhPVuPM19mNtMpWJhQ",
+                      "key" : {
+                        "type" : "jwk",
+                        "jwk" : {
+                          "kty" : "EC",
+                          "crv" : "P-256",
+                          "x" : "zi6Qj0Ggd8xiMqaiRZzkYyI3sMkFAA89kEdceHCa5AQ",
+                          "y" : "-JyeRcamM-uCS1N-naE0itVbs7fQ_5xbujSSK9pYdb4",
+                          "d" : "1xgojLKBT4hmuTjgjhz0l6RTHgmlLlVb5bnwuZkNBaA"
+                        }
+                      },
+                      "x5c" : [ "MIIBsTCCAVegAwIBAgIUJklaRrIjkEZlDdPk2+qPneHHD6kwCgYIKoZIzj0EAwIwLjEQMA4GA1UEAwwHRXhhbXBsZTENMAsGA1UECgwEVGVzdDELMAkGA1UEBhMCVVMwHhcNMjYwMzMxMDkwNDMwWhcNMjcwMzMxMDkwNDMwWjAuMRAwDgYDVQQDDAdFeGFtcGxlMQ0wCwYDVQQKDARUZXN0MQswCQYDVQQGEwJVUzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABM4ukI9BoHfMYjKmokWc5GMiN7DJBQAPPZBHXHhwmuQE+JyeRcamM+uCS1N+naE0itVbs7fQ/5xbujSSK9pYdb6jUzBRMB0GA1UdDgQWBBSwjqgulcWH4AqTJwPjBGj3VGIAsTAfBgNVHSMEGDAWgBSwjqgulcWH4AqTJwPjBGj3VGIAsTAPBgNVHRMBAf8EBTADAQH/MAoGCCqGSM49BAMCA0gAMEUCIQCoWAleGRqR+kb+5SeRt/scogZPiQiM7wJ69tadEPPJwQIgdygIZSMQSXlxXbZ10QKtN6qSjggqFVUV4/Z2/pnBUBk=" ]
+                    },
+                    "expectedOrigins" : [ "https://portal2.demo.walt.id" ]
+                  }
+                }
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Verification session created successfully",
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.verifier2.handlers.sessioncreation.VerificationSessionCreationResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid request - malformed DCQL query or invalid policy configuration",
+            "headers" : { }
+          },
+          "401" : {
+            "description" : "Authentication required",
+            "headers" : { }
+          },
+          "403" : {
+            "description" : "Insufficient permissions to create verification sessions",
+            "headers" : { }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/verification-session/{verification-session}/info" : {
+      "get" : {
+        "tags" : [ "Verification Session Management" ],
+        "summary" : "View data of existing verification session",
+        "parameters" : [ {
+          "name" : "verification-session",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.verifier2.data.Verification2Session"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/verification-session/{verification-session}" : {
+      "delete" : {
+        "tags" : [ "Verification Session Management" ],
+        "summary" : "Delete a verification session",
+        "description" : "Removes the session and everything recorded about the verification. To keep the record but remove the personal data, delete its pii instead.",
+        "parameters" : [ {
+          "name" : "verification-session",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Session deleted",
+            "headers" : { }
+          },
+          "404" : {
+            "description" : "No such session",
+            "headers" : { }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/verification-session/{verification-session}/pii" : {
+      "delete" : {
+        "tags" : [ "Verification Session Management" ],
+        "summary" : "Purge the personal data of a verification session",
+        "description" : "Keeps the session and its outcome, and removes the presented credentials, the raw presentation, the ephemeral keys and the per-policy detail. For answering an erasure request without losing the record that a verification took place.",
+        "parameters" : [ {
+          "name" : "verification-session",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Personal data purged",
+            "headers" : { }
+          },
+          "404" : {
+            "description" : "No such session",
+            "headers" : { }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/verification-session/{verification-session}/events" : {
+      "get" : {
+        "tags" : [ "Verification Session Management" ],
+        "summary" : "Receive update events via SSE about the verification session",
+        "parameters" : [ {
+          "name" : "verification-session",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "responses" : { },
+        "deprecated" : false
+      }
+    },
+    "/verification-session/{verification-session}/request" : {
+      "get" : {
+        "tags" : [ "Client endpoints" ],
+        "summary" : "Wallets lookup the AuthorizationRequest here",
+        "parameters" : [ {
+          "name" : "verification-session",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.verifier.openid.models.authorization.AuthorizationRequest"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      },
+      "post" : {
+        "tags" : [ "Client endpoints" ],
+        "summary" : "Wallets POST to the request URI (request_uri_method=post), optionally sending wallet_nonce",
+        "parameters" : [ {
+          "name" : "verification-session",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string",
+                  "title" : "String"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/verification-session/{verification-session}/response" : {
+      "post" : {
+        "tags" : [ "Client endpoints" ],
+        "summary" : "Wallets respond to an AuthorizationRequest here",
+        "parameters" : [ {
+          "name" : "verification-session",
+          "in" : "path",
+          "required" : true,
+          "deprecated" : false,
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "string",
+                "title" : "String"
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : { },
+        "deprecated" : false
+      }
+    },
+    "/transaction-data-profiles" : {
+      "get" : {
+        "tags" : [ "Transaction Data" ],
+        "summary" : "List available transaction data type profiles",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/id.walt.commons.config.list.TransactionDataProfile"
+                  },
+                  "title" : "ArrayList<TransactionDataProfile>"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/vical/fetch" : {
+      "post" : {
+        "tags" : [ "VICAL" ],
+        "summary" : "Fetches a VICAL from a remote host or from the file system and converts it to Base64",
+        "parameters" : [ ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/id.walt.vical.VicalFetchRequest"
+              },
+              "examples" : {
+                "Remote VICAL" : {
+                  "value" : {
+                    "vicalUrl" : "https://beta.nationaldts.com.au/api/vical"
+                  }
+                }
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "200" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.vical.VicalFetchResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    },
+    "/vical/validate" : {
+      "post" : {
+        "tags" : [ "VICAL" ],
+        "summary" : "Validates a VICAL by the provided verification key",
+        "parameters" : [ ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/id.walt.vical.VicalValidationRequest"
+              },
+              "examples" : {
+                "Validate provided VICAL" : {
+                  "value" : {
+                    "verificationKey" : {
+                      "type" : "jwk",
+                      "jwk" : {
+                        "kty" : "EC",
+                        "crv" : "P-256",
+                        "x" : "5n7yVdsDcdYRBAzb78_-6iAjpXCrIHId6qdJ7wwg1lE",
+                        "y" : "EFp0x5hbusr51g61xDoL9Y1nlVUqFZGBcSdsuBsjizM"
+                      }
+                    },
+                    "vicalBase64" : "hEOhASahGCFZAy ..."
+                  }
+                }
+              }
+            }
+          },
+          "required" : false
+        },
+        "responses" : {
+          "200" : {
+            "headers" : { },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/id.walt.vical.VicalValidationResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : false
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "id.walt.commons.web.modules.FeatureFlagInformationModule.FeatureFlagInformation" : {
+        "type" : "object",
+        "properties" : {
+          "features" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "LinkedHashMap<String,String>"
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int32",
+            "title" : "Int"
+          }
+        },
+        "required" : [ "features", "total" ],
+        "title" : "FeatureFlagInformationModule.FeatureFlagInformation"
+      },
+      "id.walt.commons.web.modules.FeatureFlagInformationModule.FeatureFlagInformations" : {
+        "type" : "object",
+        "properties" : {
+          "enabled" : {
+            "$ref" : "#/components/schemas/id.walt.commons.web.modules.FeatureFlagInformationModule.FeatureFlagInformation"
+          },
+          "disabled" : {
+            "$ref" : "#/components/schemas/id.walt.commons.web.modules.FeatureFlagInformationModule.FeatureFlagInformation"
+          },
+          "defaultedDisabled" : {
+            "$ref" : "#/components/schemas/id.walt.commons.web.modules.FeatureFlagInformationModule.FeatureFlagInformation"
+          }
+        },
+        "required" : [ "defaultedDisabled", "disabled", "enabled" ],
+        "title" : "FeatureFlagInformationModule.FeatureFlagInformations"
+      },
+      "dc_api_18013_7" : {
+        "type" : "object",
+        "properties" : {
+          "core_flow" : {
+            "$ref" : "#/components/schemas/id.walt.verifier2.data.GeneralFlowConfig"
+          },
+          "expectedOrigins" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "core_flow", "expectedOrigins" ],
+        "title" : ""
+      },
+      "id.walt.verifier2.data.GeneralFlowConfig" : {
+        "type" : "object",
+        "properties" : {
+          "dcql_query" : {
+            "$ref" : "#/components/schemas/id.walt.dcql.models.DcqlQuery"
+          },
+          "requestedElements" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "object",
+              "additionalProperties" : {
+                "type" : "array",
+                "items" : {
+                  "type" : "string",
+                  "title" : "String"
+                },
+                "title" : "ArrayList<String>"
+              },
+              "title" : "LinkedHashMap<String,ArrayList<String>>"
+            },
+            "title" : "LinkedHashMap<String,LinkedHashMap<String,ArrayList<String>>>"
+          },
+          "signed_request" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "encrypted_response" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "notifications" : {
+            "$ref" : "#/components/schemas/id.walt.ktornotifications.core.KtorSessionNotifications"
+          },
+          "expiration_duration" : {
+            "type" : "string",
+            "title" : "Duration"
+          },
+          "expiration_date" : {
+            "type" : "string",
+            "format" : "date-time",
+            "title" : "Instant"
+          },
+          "retention_duration" : {
+            "type" : "string",
+            "title" : "Duration"
+          },
+          "retention_date" : {
+            "type" : "string",
+            "format" : "date-time",
+            "title" : "Instant"
+          },
+          "policies" : {
+            "$ref" : "#/components/schemas/id.walt.verifier2.data.Verification2Session.DefinedVerificationPolicies"
+          },
+          "client_metadata" : {
+            "$ref" : "#/components/schemas/ClientMetadata"
+          },
+          "clientId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "sessionId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "key" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "x5c" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "verifier_info" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.verifier.openid.models.authorization.VerifierInfoItem"
+            },
+            "title" : "ArrayList<VerifierInfoItem>"
+          }
+        },
+        "required" : [ "encrypted_response", "policies", "signed_request" ],
+        "title" : "GeneralFlowConfig"
+      },
+      "id.walt.dcql.models.DcqlQuery" : {
+        "type" : "object",
+        "properties" : {
+          "credentials" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.dcql.models.CredentialQuery"
+            },
+            "title" : "ArrayList<CredentialQuery>"
+          },
+          "credential_sets" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.dcql.models.CredentialSetQuery"
+            },
+            "title" : "ArrayList<CredentialSetQuery>"
+          }
+        },
+        "required" : [ "credentials" ],
+        "title" : "DcqlQuery"
+      },
+      "id.walt.dcql.models.CredentialQuery" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "format" : {
+            "$ref" : "#/components/schemas/id.walt.dcql.models.CredentialFormat"
+          },
+          "multiple" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "meta" : {
+            "$ref" : "#/components/schemas/CredentialQueryMeta"
+          },
+          "trusted_authorities" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.dcql.models.TrustedAuthoritiesQuery"
+            },
+            "title" : "ArrayList<TrustedAuthoritiesQuery>"
+          },
+          "require_cryptographic_holder_binding" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "claims" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.dcql.models.ClaimsQuery"
+            },
+            "title" : "ArrayList<ClaimsQuery>"
+          },
+          "claim_sets" : {
+            "type" : "array",
+            "items" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string",
+                "title" : "String"
+              },
+              "title" : "ArrayList<String>"
+            },
+            "title" : "ArrayList<ArrayList<String>>"
+          }
+        },
+        "required" : [ "format", "id", "meta", "multiple", "require_cryptographic_holder_binding" ],
+        "title" : "CredentialQuery"
+      },
+      "id.walt.dcql.models.CredentialFormat" : {
+        "type" : "string",
+        "enum" : [ "jwt_vc_json", "ldp_vc", "mso_mdoc", "dc+sd-jwt", "ac_vp" ],
+        "title" : "CredentialFormat"
+      },
+      "CredentialQueryMeta" : {
+        "type" : "object",
+        "properties" : { },
+        "title" : "CredentialQueryMeta"
+      },
+      "id.walt.dcql.models.TrustedAuthoritiesQuery" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "$ref" : "#/components/schemas/id.walt.dcql.models.TrustedAuthorityType"
+          },
+          "values" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          }
+        },
+        "required" : [ "type", "values" ],
+        "title" : "TrustedAuthoritiesQuery"
+      },
+      "id.walt.dcql.models.TrustedAuthorityType" : {
+        "type" : "string",
+        "enum" : [ "aki", "etsi_tl", "openid_federation" ],
+        "title" : "TrustedAuthorityType"
+      },
+      "id.walt.dcql.models.ClaimsQuery" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "path" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonElement"
+            },
+            "title" : "ArrayList<JsonElement>"
+          },
+          "values" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "JsonPrimitive"
+            },
+            "title" : "ArrayList<JsonPrimitive>"
+          },
+          "intent_to_retain" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          }
+        },
+        "required" : [ "path" ],
+        "title" : "ClaimsQuery"
+      },
+      "kotlinx.serialization.json.JsonElement" : {
+        "type" : "object",
+        "title" : "JsonElement"
+      },
+      "id.walt.dcql.models.CredentialSetQuery" : {
+        "type" : "object",
+        "properties" : {
+          "options" : {
+            "type" : "array",
+            "items" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string",
+                "title" : "String"
+              },
+              "title" : "ArrayList<String>"
+            },
+            "title" : "ArrayList<ArrayList<String>>"
+          },
+          "required" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          }
+        },
+        "required" : [ "options", "required" ],
+        "title" : "CredentialSetQuery"
+      },
+      "id.walt.ktornotifications.core.KtorSessionNotifications" : {
+        "type" : "object",
+        "properties" : {
+          "webhook" : {
+            "$ref" : "#/components/schemas/id.walt.ktornotifications.core.KtorSessionNotifications.VerificationSessionWebhookNotification"
+          }
+        },
+        "title" : "KtorSessionNotifications"
+      },
+      "id.walt.ktornotifications.core.KtorSessionNotifications.VerificationSessionWebhookNotification" : {
+        "type" : "object",
+        "properties" : {
+          "url" : {
+            "type" : "string",
+            "title" : "Url"
+          },
+          "basic_auth_username" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "basic_auth_password" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "bearer_token" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "url" ],
+        "title" : "KtorSessionNotifications.VerificationSessionWebhookNotification"
+      },
+      "id.walt.verifier2.data.Verification2Session.DefinedVerificationPolicies" : {
+        "type" : "object",
+        "properties" : {
+          "vp_policies" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.policies2.vp.policies.VPPolicy2"
+            },
+            "title" : "ArrayList<VPPolicy2>"
+          },
+          "vc_policies" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.policies2.vc.policies.CredentialVerificationPolicy2"
+            },
+            "title" : "ArrayList<CredentialVerificationPolicy2>"
+          },
+          "specific_vc_policies" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/components/schemas/id.walt.policies2.vc.policies.CredentialVerificationPolicy2"
+              },
+              "title" : "ArrayList<CredentialVerificationPolicy2>"
+            },
+            "title" : "LinkedHashMap<String,ArrayList<CredentialVerificationPolicy2>>"
+          }
+        },
+        "title" : "Verification2Session.DefinedVerificationPolicies"
+      },
+      "id.walt.policies2.vp.policies.VPPolicy2" : {
+        "anyOf" : [ {
+          "$ref" : "#/components/schemas/dc+sd-jwt.audience-check"
+        }, {
+          "$ref" : "#/components/schemas/dc+sd-jwt.exp-check"
+        }, {
+          "$ref" : "#/components/schemas/dc+sd-jwt.kb-jwt_iat-check"
+        }, {
+          "$ref" : "#/components/schemas/dc+sd-jwt.kb-jwt_signature"
+        }, {
+          "$ref" : "#/components/schemas/dc+sd-jwt.nbf-check"
+        }, {
+          "$ref" : "#/components/schemas/dc+sd-jwt.nonce-check"
+        }, {
+          "$ref" : "#/components/schemas/dc+sd-jwt.sd_hash-check"
+        }, {
+          "$ref" : "#/components/schemas/dc+sd-jwt.transaction-data-hash-check"
+        }, {
+          "$ref" : "#/components/schemas/dc+sd-jwt.transaction-data-hashes-check"
+        }, {
+          "$ref" : "#/components/schemas/jwt_vc_json.audience-check"
+        }, {
+          "$ref" : "#/components/schemas/jwt_vc_json.exp-check"
+        }, {
+          "$ref" : "#/components/schemas/jwt_vc_json.nbf-check"
+        }, {
+          "$ref" : "#/components/schemas/jwt_vc_json.nonce-check"
+        }, {
+          "$ref" : "#/components/schemas/jwt_vc_json.envelope_signature"
+        }, {
+          "$ref" : "#/components/schemas/mso_mdoc.device-auth"
+        }, {
+          "$ref" : "#/components/schemas/mso_mdoc.device_key_auth"
+        }, {
+          "$ref" : "#/components/schemas/mso_mdoc.issuer_auth"
+        }, {
+          "$ref" : "#/components/schemas/mso_mdoc.issuer_signed_integrity"
+        }, {
+          "$ref" : "#/components/schemas/mso_mdoc.mso"
+        }, {
+          "$ref" : "#/components/schemas/mso_mdoc.transaction-data-hash-check"
+        } ],
+        "discriminator" : {
+          "propertyName" : "type"
+        },
+        "title" : "VPPolicy2"
+      },
+      "dc+sd-jwt.audience-check" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "description" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "description", "id" ],
+        "title" : ""
+      },
+      "dc+sd-jwt.exp-check" : {
+        "type" : "object",
+        "properties" : {
+          "clockSkewSeconds" : {
+            "type" : "integer",
+            "format" : "int64",
+            "title" : "Long"
+          },
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "description" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "clockSkewSeconds", "description", "id" ],
+        "title" : ""
+      },
+      "dc+sd-jwt.kb-jwt_iat-check" : {
+        "type" : "object",
+        "properties" : {
+          "maxAgeMinutes" : {
+            "type" : "integer",
+            "format" : "int64",
+            "title" : "Long"
+          },
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "description" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "description", "id", "maxAgeMinutes" ],
+        "title" : ""
+      },
+      "dc+sd-jwt.kb-jwt_signature" : {
+        "type" : "object",
+        "properties" : {
+          "allowedAlgorithms" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "LinkedHashSet<String>",
+            "uniqueItems" : true
+          },
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "description" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "allowedAlgorithms", "description", "id" ],
+        "title" : ""
+      },
+      "dc+sd-jwt.nbf-check" : {
+        "type" : "object",
+        "properties" : {
+          "clockSkewSeconds" : {
+            "type" : "integer",
+            "format" : "int64",
+            "title" : "Long"
+          },
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "description" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "clockSkewSeconds", "description", "id" ],
+        "title" : ""
+      },
+      "dc+sd-jwt.nonce-check" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "description" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "description", "id" ],
+        "title" : ""
+      },
+      "dc+sd-jwt.sd_hash-check" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "description" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "description", "id" ],
+        "title" : ""
+      },
+      "dc+sd-jwt.transaction-data-hash-check" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "description" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "description", "id" ],
+        "title" : ""
+      },
+      "dc+sd-jwt.transaction-data-hashes-check" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "description" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "description", "id" ],
+        "title" : ""
+      },
+      "jwt_vc_json.audience-check" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "description" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "description", "id" ],
+        "title" : ""
+      },
+      "jwt_vc_json.exp-check" : {
+        "type" : "object",
+        "properties" : {
+          "clockSkewSeconds" : {
+            "type" : "integer",
+            "format" : "int64",
+            "title" : "Long"
+          },
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "description" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "clockSkewSeconds", "description", "id" ],
+        "title" : ""
+      },
+      "jwt_vc_json.nbf-check" : {
+        "type" : "object",
+        "properties" : {
+          "clockSkewSeconds" : {
+            "type" : "integer",
+            "format" : "int64",
+            "title" : "Long"
+          },
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "description" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "clockSkewSeconds", "description", "id" ],
+        "title" : ""
+      },
+      "jwt_vc_json.nonce-check" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "description" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "description", "id" ],
+        "title" : ""
+      },
+      "jwt_vc_json.envelope_signature" : {
+        "type" : "object",
+        "properties" : {
+          "allowedAlgorithms" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "LinkedHashSet<String>",
+            "uniqueItems" : true
+          },
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "description" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "allowedAlgorithms", "description", "id" ],
+        "title" : ""
+      },
+      "mso_mdoc.device-auth" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "description" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "description", "id" ],
+        "title" : ""
+      },
+      "mso_mdoc.device_key_auth" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "description" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "description", "id" ],
+        "title" : ""
+      },
+      "mso_mdoc.issuer_auth" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "description" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "description", "id" ],
+        "title" : ""
+      },
+      "mso_mdoc.issuer_signed_integrity" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "description" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "description", "id" ],
+        "title" : ""
+      },
+      "mso_mdoc.mso" : {
+        "type" : "object",
+        "properties" : {
+          "strict_etsi_precision" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "description" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "description", "id", "strict_etsi_precision" ],
+        "title" : ""
+      },
+      "mso_mdoc.transaction-data-hash-check" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "description" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "description", "id" ],
+        "title" : ""
+      },
+      "id.walt.policies2.vc.policies.CredentialVerificationPolicy2" : {
+        "anyOf" : [ {
+          "$ref" : "#/components/schemas/allowed-issuer"
+        }, {
+          "$ref" : "#/components/schemas/signature"
+        }, {
+          "$ref" : "#/components/schemas/etsi-trust-list"
+        }, {
+          "$ref" : "#/components/schemas/expiration"
+        }, {
+          "$ref" : "#/components/schemas/schema"
+        }, {
+          "$ref" : "#/components/schemas/not-before"
+        }, {
+          "$ref" : "#/components/schemas/regex"
+        }, {
+          "$ref" : "#/components/schemas/revoked-status-list"
+        }, {
+          "$ref" : "#/components/schemas/credential-status"
+        }, {
+          "$ref" : "#/components/schemas/vct-integrity"
+        }, {
+          "$ref" : "#/components/schemas/vical"
+        }, {
+          "$ref" : "#/components/schemas/webhook"
+        } ],
+        "discriminator" : {
+          "propertyName" : "type"
+        },
+        "title" : "CredentialVerificationPolicy2"
+      },
+      "allowed-issuer" : {
+        "type" : "object",
+        "properties" : {
+          "allowed_issuer" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonElement"
+          },
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "allowed_issuer", "id" ],
+        "title" : ""
+      },
+      "signature" : {
+        "type" : "object",
+        "properties" : {
+          "allowedJwsAlgorithms" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "LinkedHashSet<String>",
+            "uniqueItems" : true
+          },
+          "allowedCoseAlgorithms" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "format" : "int32",
+              "title" : "Int"
+            },
+            "title" : "LinkedHashSet<Int>",
+            "uniqueItems" : true
+          },
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "allowedCoseAlgorithms", "allowedJwsAlgorithms", "id" ],
+        "title" : ""
+      },
+      "etsi-trust-list" : {
+        "type" : "object",
+        "properties" : {
+          "trustRegistryUrl" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "trustLists" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "expectedEntityType" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "expectedServiceType" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "allowStaleSource" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "requireAuthenticated" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "validateSignatures" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "trustedSourceSignerCertificates" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "allowStaleSource", "id", "requireAuthenticated", "trustedSourceSignerCertificates", "validateSignatures" ],
+        "title" : ""
+      },
+      "expiration" : {
+        "type" : "object",
+        "properties" : {
+          "requireField" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "id", "requireField" ],
+        "title" : ""
+      },
+      "schema" : {
+        "type" : "object",
+        "properties" : {
+          "schema" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "schemaUrl" : {
+            "type" : "string",
+            "title" : "Url"
+          },
+          "defaultType" : {
+            "$ref" : "#/components/schemas/io.github.optimumcode.json.schema.SchemaType"
+          },
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "id" ],
+        "title" : ""
+      },
+      "kotlinx.serialization.json.JsonObject" : {
+        "type" : "object",
+        "title" : "JsonObject"
+      },
+      "io.github.optimumcode.json.schema.SchemaType" : {
+        "type" : "string",
+        "enum" : [ "DRAFT_4", "DRAFT_6", "DRAFT_7", "DRAFT_2019_09", "DRAFT_2020_12" ],
+        "title" : "SchemaType"
+      },
+      "not-before" : {
+        "type" : "object",
+        "properties" : {
+          "requireField" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "id", "requireField" ],
+        "title" : ""
+      },
+      "regex" : {
+        "type" : "object",
+        "properties" : {
+          "path" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "regex" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "regex_options" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/kotlin.text.RegexOption"
+            },
+            "title" : "LinkedHashSet<RegexOption>"
+          },
+          "allowNull" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "allowNull", "id", "path", "regex" ],
+        "title" : ""
+      },
+      "kotlin.text.RegexOption" : {
+        "type" : "string",
+        "enum" : [ "IGNORE_CASE", "MULTILINE", "LITERAL", "UNIX_LINES", "COMMENTS", "DOT_MATCHES_ALL", "CANON_EQ" ],
+        "title" : "RegexOption"
+      },
+      "revoked-status-list" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "id" ],
+        "title" : ""
+      },
+      "credential-status" : {
+        "type" : "object",
+        "properties" : {
+          "argument" : {
+            "$ref" : "#/components/schemas/id.walt.policies2.vc.policies.status.model.StatusPolicyArgument"
+          },
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "argument", "id" ],
+        "title" : ""
+      },
+      "id.walt.policies2.vc.policies.status.model.StatusPolicyArgument" : {
+        "anyOf" : [ {
+          "$ref" : "#/components/schemas/ietf"
+        }, {
+          "$ref" : "#/components/schemas/w3c"
+        }, {
+          "$ref" : "#/components/schemas/w3c-list"
+        } ],
+        "discriminator" : {
+          "propertyName" : "type"
+        },
+        "title" : "StatusPolicyArgument"
+      },
+      "ietf" : {
+        "type" : "object",
+        "properties" : {
+          "value" : {
+            "type" : "integer",
+            "maximum" : 4294967295,
+            "minimum" : 0,
+            "title" : "UInt"
+          },
+          "values" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "maximum" : 4294967295,
+              "minimum" : 0,
+              "title" : "UInt"
+            },
+            "title" : "ArrayList<UInt>"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "title" : ""
+      },
+      "w3c" : {
+        "type" : "object",
+        "properties" : {
+          "value" : {
+            "type" : "integer",
+            "maximum" : 4294967295,
+            "minimum" : 0,
+            "title" : "UInt"
+          },
+          "values" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "maximum" : 4294967295,
+              "minimum" : 0,
+              "title" : "UInt"
+            },
+            "title" : "ArrayList<UInt>"
+          },
+          "purpose" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "purpose", "type" ],
+        "title" : ""
+      },
+      "w3c-list" : {
+        "type" : "object",
+        "properties" : {
+          "list" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/w3c"
+            },
+            "title" : "ArrayList<>"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "list" ],
+        "title" : ""
+      },
+      "vct-integrity" : {
+        "type" : "object",
+        "properties" : {
+          "skipValueVerification" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "id", "skipValueVerification" ],
+        "title" : ""
+      },
+      "vical" : {
+        "type" : "object",
+        "properties" : {
+          "vical" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "vicalUrl" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "enableDocumentTypeValidation" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "enableRevocation" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "enableDocumentTypeValidation", "enableRevocation", "id", "vical" ],
+        "title" : ""
+      },
+      "webhook" : {
+        "type" : "object",
+        "properties" : {
+          "url" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "basicauth_username" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "basicauth_password" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "bearerauth_token" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "id", "url" ],
+        "title" : ""
+      },
+      "ClientMetadata" : {
+        "type" : "object",
+        "properties" : {
+          "jwks" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "vp_formats_supported" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+            },
+            "title" : "LinkedHashMap<String,JsonObject>"
+          },
+          "encrypted_response_enc_values_supported" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "subject_syntax_types_supported" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "id_token_signed_response_alg" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "redirect_uris" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "client_name" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "logo_uri" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "tos_uri" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "policy_uri" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "client_uri" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "title" : "ClientMetadata"
+      },
+      "id.walt.verifier.openid.models.authorization.VerifierInfoItem" : {
+        "type" : "object",
+        "properties" : {
+          "format" : {
+            "$ref" : "#/components/schemas/id.walt.verifier.openid.models.credentials.AttestationFormat"
+          },
+          "data" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "credential_ids" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          }
+        },
+        "required" : [ "data", "format" ],
+        "title" : "VerifierInfoItem"
+      },
+      "id.walt.verifier.openid.models.credentials.AttestationFormat" : {
+        "type" : "string",
+        "enum" : [ "jwt", "registration_cert" ],
+        "title" : "AttestationFormat"
+      },
+      "dc_api_openid4vp" : {
+        "type" : "object",
+        "properties" : {
+          "core_flow" : {
+            "$ref" : "#/components/schemas/id.walt.verifier2.data.GeneralFlowConfig"
+          },
+          "openid" : {
+            "$ref" : "#/components/schemas/id.walt.verifier2.data.OpenId4VPConfig"
+          },
+          "expectedOrigins" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "haip" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "core_flow", "expectedOrigins", "haip" ],
+        "title" : ""
+      },
+      "id.walt.verifier2.data.OpenId4VPConfig" : {
+        "type" : "object",
+        "properties" : {
+          "transactionData" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+            },
+            "title" : "ArrayList<JsonObject>"
+          },
+          "responseType" : {
+            "$ref" : "#/components/schemas/id.walt.verifier.openid.models.openid.OpenID4VPResponseType"
+          },
+          "scope" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "id_token_type" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "id_token_signed_response_alg" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "responseType" ],
+        "title" : "OpenId4VPConfig"
+      },
+      "id.walt.verifier.openid.models.openid.OpenID4VPResponseType" : {
+        "type" : "string",
+        "enum" : [ "vp_token", "vp_token id_token", "code" ],
+        "title" : "OpenID4VPResponseType"
+      },
+      "cross_device" : {
+        "type" : "object",
+        "properties" : {
+          "core_flow" : {
+            "$ref" : "#/components/schemas/id.walt.verifier2.data.GeneralFlowConfig"
+          },
+          "url_config" : {
+            "$ref" : "#/components/schemas/id.walt.verifier2.data.UrlConfig"
+          },
+          "openid" : {
+            "$ref" : "#/components/schemas/id.walt.verifier2.data.OpenId4VPConfig"
+          },
+          "redirects" : {
+            "$ref" : "#/components/schemas/id.walt.verifier2.data.Verification2Session.VerificationSessionRedirects"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "core_flow", "url_config" ],
+        "title" : ""
+      },
+      "id.walt.verifier2.data.UrlConfig" : {
+        "type" : "object",
+        "properties" : {
+          "url_host" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "url_prefix" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "title" : "UrlConfig"
+      },
+      "id.walt.verifier2.data.Verification2Session.VerificationSessionRedirects" : {
+        "type" : "object",
+        "properties" : {
+          "success_redirect_uri" : {
+            "type" : "string",
+            "title" : "Url"
+          },
+          "error_redirect_uri" : {
+            "type" : "string",
+            "title" : "Url"
+          }
+        },
+        "title" : "Verification2Session.VerificationSessionRedirects"
+      },
+      "same_device" : {
+        "type" : "object",
+        "properties" : {
+          "core" : {
+            "$ref" : "#/components/schemas/id.walt.verifier2.data.GeneralFlowConfig"
+          },
+          "urlConfig" : {
+            "$ref" : "#/components/schemas/id.walt.verifier2.data.UrlConfig"
+          },
+          "openid" : {
+            "$ref" : "#/components/schemas/id.walt.verifier2.data.OpenId4VPConfig"
+          },
+          "redirects" : {
+            "$ref" : "#/components/schemas/id.walt.verifier2.data.Verification2Session.VerificationSessionRedirects"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "core", "redirects", "urlConfig" ],
+        "title" : ""
+      },
+      "id.walt.verifier2.data.VerificationSessionSetup" : {
+        "anyOf" : [ {
+          "$ref" : "#/components/schemas/dc_api_18013_7"
+        }, {
+          "$ref" : "#/components/schemas/dc_api_openid4vp"
+        }, {
+          "$ref" : "#/components/schemas/cross_device"
+        }, {
+          "$ref" : "#/components/schemas/same_device"
+        } ],
+        "discriminator" : {
+          "propertyName" : "type"
+        },
+        "title" : "VerificationSessionSetup"
+      },
+      "id.walt.verifier2.handlers.sessioncreation.VerificationSessionCreationResponse" : {
+        "type" : "object",
+        "properties" : {
+          "sessionId" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "bootstrapAuthorizationRequestUrl" : {
+            "type" : "string",
+            "title" : "Url"
+          },
+          "fullAuthorizationRequestUrl" : {
+            "type" : "string",
+            "title" : "Url"
+          },
+          "creationTarget" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "data" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonElement"
+          }
+        },
+        "required" : [ "sessionId" ],
+        "title" : "VerificationSessionCreationResponse"
+      },
+      "id.walt.verifier2.data.Verification2Session.VerificationSessionStatus" : {
+        "type" : "string",
+        "enum" : [ "UNKNOWN", "ACTIVE", "UNUSED", "IN_USE", "VALIDATING_RECEIVED_REQUEST", "PROCESSING_FLOW", "EXPIRED", "SUCCESSFUL", "FAILED" ],
+        "title" : "Verification2Session.VerificationSessionStatus"
+      },
+      "id.walt.verifier.openid.models.authorization.AuthorizationRequest" : {
+        "type" : "object",
+        "properties" : {
+          "response_type" : {
+            "$ref" : "#/components/schemas/id.walt.verifier.openid.models.openid.OpenID4VPResponseType"
+          },
+          "client_id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "redirect_uri" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "scope" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "state" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "response_mode" : {
+            "$ref" : "#/components/schemas/id.walt.verifier.openid.models.openid.OpenID4VPResponseMode"
+          },
+          "nonce" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "request" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "request_uri" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "response_uri" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "dcql_query" : {
+            "$ref" : "#/components/schemas/id.walt.dcql.models.DcqlQuery"
+          },
+          "client_metadata" : {
+            "$ref" : "#/components/schemas/ClientMetadata"
+          },
+          "request_uri_method" : {
+            "$ref" : "#/components/schemas/id.walt.verifier.openid.models.authorization.RequestUriHttpMethod"
+          },
+          "transaction_data" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "verifier_info" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.verifier.openid.models.authorization.VerifierInfoItem"
+            },
+            "title" : "ArrayList<VerifierInfoItem>"
+          },
+          "id_token_type" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "wallet_nonce" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "expected_origins" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "iss" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "title" : "AuthorizationRequest"
+      },
+      "id.walt.verifier.openid.models.openid.OpenID4VPResponseMode" : {
+        "type" : "string",
+        "enum" : [ "fragment", "query", "direct_post", "direct_post.jwt", "dc_api", "dc_api.jwt", "form_post" ],
+        "title" : "OpenID4VPResponseMode"
+      },
+      "id.walt.verifier.openid.models.authorization.RequestUriHttpMethod" : {
+        "type" : "string",
+        "enum" : [ "get", "post" ],
+        "title" : "RequestUriHttpMethod"
+      },
+      "id.walt.verifier2.data.Verification2Session.RequestMode" : {
+        "type" : "string",
+        "enum" : [ "URL_ENCODED", "URL_ENCODED_SIGNED", "REQUEST_URI", "REQUEST_URI_SIGNED", "DC_API" ],
+        "title" : "Verification2Session.RequestMode"
+      },
+      "id.walt.verifier2.verification2.Verifier2PolicyResults" : {
+        "type" : "object",
+        "properties" : {
+          "vp_policies" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "object",
+              "additionalProperties" : {
+                "$ref" : "#/components/schemas/id.walt.policies2.vp.policies.VPPolicy2.PolicyRunResult"
+              },
+              "title" : "LinkedHashMap<String,VPPolicy2.PolicyRunResult>"
+            },
+            "title" : "LinkedHashMap<String,LinkedHashMap<String,VPPolicy2.PolicyRunResult>>"
+          },
+          "vc_policies" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.policies2.vc.CredentialPolicyResult"
+            },
+            "title" : "ArrayList<CredentialPolicyResult>"
+          },
+          "specific_vc_policies" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/components/schemas/id.walt.policies2.vc.CredentialPolicyResult"
+              },
+              "title" : "ArrayList<CredentialPolicyResult>"
+            },
+            "title" : "LinkedHashMap<String,ArrayList<CredentialPolicyResult>>"
+          },
+          "overallSuccess" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          }
+        },
+        "required" : [ "overallSuccess", "specific_vc_policies", "vc_policies", "vp_policies" ],
+        "title" : "Verifier2PolicyResults"
+      },
+      "id.walt.policies2.vp.policies.VPPolicy2.PolicyRunResult" : {
+        "type" : "object",
+        "properties" : {
+          "policy_executed" : {
+            "$ref" : "#/components/schemas/id.walt.policies2.vp.policies.VPPolicy2"
+          },
+          "success" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "results" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonElement"
+            },
+            "title" : "LinkedHashMap<String,JsonElement>"
+          },
+          "errors" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.policies2.vp.policies.VPPolicy2.PolicyRunError"
+            },
+            "title" : "ArrayList<VPPolicy2.PolicyRunError>"
+          },
+          "execution_time" : {
+            "type" : "string",
+            "title" : "Duration"
+          }
+        },
+        "required" : [ "errors", "execution_time", "policy_executed", "results", "success" ],
+        "title" : "VPPolicy2.PolicyRunResult"
+      },
+      "id.walt.policies2.vp.policies.VPPolicy2.PolicyRunError" : {
+        "type" : "object",
+        "properties" : {
+          "error" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "message" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "cause" : {
+            "$ref" : "#/components/schemas/id.walt.policies2.vp.policies.VPPolicy2.PolicyRunError"
+          }
+        },
+        "required" : [ "error" ],
+        "title" : "VPPolicy2.PolicyRunError"
+      },
+      "id.walt.policies2.vc.CredentialPolicyResult" : {
+        "type" : "object",
+        "properties" : {
+          "policy" : {
+            "$ref" : "#/components/schemas/id.walt.policies2.vc.policies.CredentialVerificationPolicy2"
+          },
+          "success" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "result" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonElement"
+          },
+          "error" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "query_id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "credential_index" : {
+            "type" : "integer",
+            "format" : "int32",
+            "title" : "Int"
+          }
+        },
+        "required" : [ "policy", "success" ],
+        "title" : "CredentialPolicyResult"
+      },
+      "id.walt.verifier2.data.Verification2Session.PresentedRawData" : {
+        "type" : "object",
+        "properties" : {
+          "vpToken" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string",
+                "title" : "String"
+              },
+              "title" : "ArrayList<String>"
+            },
+            "title" : "LinkedHashMap<String,ArrayList<String>>"
+          },
+          "state" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "vpToken" ],
+        "title" : "Verification2Session.PresentedRawData"
+      },
+      "id.walt.credentials.presentations.formats.VerifiablePresentation" : {
+        "anyOf" : [ {
+          "$ref" : "#/components/schemas/dc+sd-jwt"
+        }, {
+          "$ref" : "#/components/schemas/jwt_vc_json"
+        }, {
+          "$ref" : "#/components/schemas/ldp_vc"
+        }, {
+          "$ref" : "#/components/schemas/mso_mdoc"
+        } ],
+        "discriminator" : {
+          "propertyName" : "type"
+        },
+        "title" : "VerifiablePresentation"
+      },
+      "dc+sd-jwt" : {
+        "type" : "object",
+        "properties" : {
+          "format" : {
+            "$ref" : "#/components/schemas/id.walt.credentials.presentations.PresentationFormat"
+          },
+          "sdJwt" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "disclosures" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "keyBindingJwt" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "credential" : {
+            "$ref" : "#/components/schemas/id.walt.credentials.formats.DigitalCredential"
+          },
+          "audience" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "nonce" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "sdHash" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "transactionDataHashes" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "transactionDataHashesAlg" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "presentationStringHashable" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "credential", "disclosures", "format", "keyBindingJwt", "presentationStringHashable", "sdJwt" ],
+        "title" : ""
+      },
+      "id.walt.credentials.presentations.PresentationFormat" : {
+        "type" : "string",
+        "enum" : [ "jwt_vc_json", "dc+sd-jwt", "ldp_vc", "mso_mdoc" ],
+        "title" : "PresentationFormat"
+      },
+      "id.walt.credentials.formats.DigitalCredential" : {
+        "anyOf" : [ {
+          "$ref" : "#/components/schemas/vc-w3c_1_1"
+        }, {
+          "$ref" : "#/components/schemas/vc-w3c_2"
+        }, {
+          "$ref" : "#/components/schemas/vc-mdocs"
+        }, {
+          "$ref" : "#/components/schemas/vc-sd_jwt"
+        } ],
+        "discriminator" : {
+          "propertyName" : "type"
+        },
+        "title" : "DigitalCredential"
+      },
+      "vc-w3c_1_1" : {
+        "type" : "object",
+        "properties" : {
+          "disclosables" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string",
+                "title" : "String"
+              },
+              "title" : "LinkedHashSet<String>",
+              "uniqueItems" : true
+            },
+            "title" : "LinkedHashMap<String,LinkedHashSet<String>>"
+          },
+          "disclosures" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.credentials.signatures.sdjwt.SdJwtSelectiveDisclosure"
+            },
+            "title" : "ArrayList<SdJwtSelectiveDisclosure>"
+          },
+          "signedWithDisclosures" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "credentialData" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "originalCredentialData" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "issuer" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "subject" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "signature" : {
+            "$ref" : "#/components/schemas/id.walt.credentials.signatures.CredentialSignature"
+          },
+          "signed" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "format" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "credentialData", "format" ],
+        "title" : ""
+      },
+      "id.walt.credentials.signatures.sdjwt.SdJwtSelectiveDisclosure" : {
+        "type" : "object",
+        "properties" : {
+          "salt" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "name" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "value" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonElement"
+          },
+          "location" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonElement"
+            },
+            "title" : "ArrayList<JsonElement>"
+          },
+          "encoded" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "encoded", "salt", "value" ],
+        "title" : "SdJwtSelectiveDisclosure"
+      },
+      "id.walt.credentials.signatures.CredentialSignature" : {
+        "anyOf" : [ {
+          "$ref" : "#/components/schemas/signature-cose"
+        }, {
+          "$ref" : "#/components/schemas/signature-dip"
+        }, {
+          "$ref" : "#/components/schemas/signature-jwt"
+        }, {
+          "$ref" : "#/components/schemas/signature-sd_jwt"
+        } ],
+        "discriminator" : {
+          "propertyName" : "type"
+        },
+        "title" : "CredentialSignature"
+      },
+      "signature-cose" : {
+        "type" : "object",
+        "properties" : {
+          "signerKey" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "x5cList" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "X5CCertificateString"
+            },
+            "title" : "X5CList"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "signerKey" ],
+        "title" : ""
+      },
+      "signature-dip" : {
+        "type" : "object",
+        "properties" : {
+          "signature" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "signature" ],
+        "title" : ""
+      },
+      "signature-jwt" : {
+        "type" : "object",
+        "properties" : {
+          "signature" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "jwtHeader" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "signature" ],
+        "title" : ""
+      },
+      "signature-sd_jwt" : {
+        "type" : "object",
+        "properties" : {
+          "signature" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "jwtHeader" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "providedDisclosures" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.credentials.signatures.sdjwt.SdJwtSelectiveDisclosure"
+            },
+            "title" : "ArrayList<SdJwtSelectiveDisclosure>"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "signature" ],
+        "title" : ""
+      },
+      "vc-w3c_2" : {
+        "type" : "object",
+        "properties" : {
+          "disclosables" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string",
+                "title" : "String"
+              },
+              "title" : "LinkedHashSet<String>",
+              "uniqueItems" : true
+            },
+            "title" : "LinkedHashMap<String,LinkedHashSet<String>>"
+          },
+          "disclosures" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.credentials.signatures.sdjwt.SdJwtSelectiveDisclosure"
+            },
+            "title" : "ArrayList<SdJwtSelectiveDisclosure>"
+          },
+          "signedWithDisclosures" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "credentialData" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "originalCredentialData" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "issuer" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "subject" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "signature" : {
+            "$ref" : "#/components/schemas/id.walt.credentials.signatures.CredentialSignature"
+          },
+          "signed" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "format" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "credentialData", "format" ],
+        "title" : ""
+      },
+      "vc-mdocs" : {
+        "type" : "object",
+        "properties" : {
+          "credentialData" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "signed" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "docType" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "signature" : {
+            "$ref" : "#/components/schemas/id.walt.credentials.signatures.CredentialSignature"
+          },
+          "issuer" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "subject" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "format" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "mso" : {
+            "$ref" : "#/components/schemas/id.walt.mdoc.objects.mso.MobileSecurityObject"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "credentialData", "docType", "format" ],
+        "title" : ""
+      },
+      "id.walt.mdoc.objects.mso.MobileSecurityObject" : {
+        "type" : "object",
+        "properties" : {
+          "version" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "digestAlgorithm" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "valueDigests" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "$ref" : "#/components/schemas/kotlinx.serialization.ContextualSerializer<ValueDigestList>"
+            },
+            "title" : "LinkedHashMap<String,ContextualSerializer<ValueDigestList>>"
+          },
+          "deviceKeyInfo" : {
+            "$ref" : "#/components/schemas/id.walt.mdoc.objects.mso.DeviceKeyInfo"
+          },
+          "docType" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "validityInfo" : {
+            "$ref" : "#/components/schemas/id.walt.mdoc.objects.mso.ValidityInfo"
+          },
+          "status" : {
+            "$ref" : "#/components/schemas/id.walt.mdoc.objects.mso.Status"
+          }
+        },
+        "required" : [ "deviceKeyInfo", "digestAlgorithm", "docType", "validityInfo", "valueDigests", "version" ],
+        "title" : "MobileSecurityObject"
+      },
+      "kotlinx.serialization.ContextualSerializer<ValueDigestList>" : {
+        "type" : "object",
+        "properties" : { },
+        "title" : "ContextualSerializer<ValueDigestList>"
+      },
+      "id.walt.mdoc.objects.mso.DeviceKeyInfo" : {
+        "type" : "object",
+        "properties" : {
+          "deviceKey" : {
+            "$ref" : "#/components/schemas/id.walt.cose.CoseKey"
+          },
+          "keyAuthorizations" : {
+            "$ref" : "#/components/schemas/id.walt.mdoc.objects.mso.KeyAuthorization"
+          },
+          "keyInfo" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "LinkedHashMap<Int,String>"
+          }
+        },
+        "required" : [ "deviceKey" ],
+        "title" : "DeviceKeyInfo"
+      },
+      "id.walt.cose.CoseKey" : {
+        "type" : "object",
+        "properties" : {
+          "kty" : {
+            "type" : "integer",
+            "format" : "int32",
+            "title" : "Int"
+          },
+          "kid" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "maximum" : 127,
+              "minimum" : -128,
+              "title" : "Byte"
+            },
+            "title" : "ByteArray<Byte>"
+          },
+          "alg" : {
+            "type" : "integer",
+            "format" : "int32",
+            "title" : "Int"
+          },
+          "key_ops" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "format" : "int32",
+              "title" : "Int"
+            },
+            "title" : "ArrayList<Int>"
+          },
+          "Base IV" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "maximum" : 127,
+              "minimum" : -128,
+              "title" : "Byte"
+            },
+            "title" : "ByteArray<Byte>"
+          },
+          "crv" : {
+            "type" : "integer",
+            "format" : "int32",
+            "title" : "Int"
+          },
+          "x" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "maximum" : 127,
+              "minimum" : -128,
+              "title" : "Byte"
+            },
+            "title" : "ByteArray<Byte>"
+          },
+          "y" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "maximum" : 127,
+              "minimum" : -128,
+              "title" : "Byte"
+            },
+            "title" : "ByteArray<Byte>"
+          },
+          "d" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "maximum" : 127,
+              "minimum" : -128,
+              "title" : "Byte"
+            },
+            "title" : "ByteArray<Byte>"
+          }
+        },
+        "required" : [ "kty" ],
+        "title" : "CoseKey"
+      },
+      "id.walt.mdoc.objects.mso.KeyAuthorization" : {
+        "type" : "object",
+        "properties" : {
+          "nameSpaces" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          },
+          "dataElements" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string",
+                "title" : "String"
+              },
+              "title" : "ArrayList<String>"
+            },
+            "title" : "LinkedHashMap<String,ArrayList<String>>"
+          }
+        },
+        "title" : "KeyAuthorization"
+      },
+      "id.walt.mdoc.objects.mso.ValidityInfo" : {
+        "type" : "object",
+        "properties" : {
+          "signed" : {
+            "type" : "string",
+            "title" : "MdocTDateInstant"
+          },
+          "validFrom" : {
+            "type" : "string",
+            "title" : "MdocTDateInstant"
+          },
+          "validUntil" : {
+            "type" : "string",
+            "title" : "MdocTDateInstant"
+          },
+          "expectedUpdate" : {
+            "type" : "string",
+            "title" : "MdocTDateInstant"
+          }
+        },
+        "required" : [ "signed", "validFrom", "validUntil" ],
+        "title" : "ValidityInfo"
+      },
+      "id.walt.mdoc.objects.mso.Status" : {
+        "type" : "object",
+        "properties" : {
+          "identifier_list" : {
+            "$ref" : "#/components/schemas/id.walt.mdoc.objects.mso.Status.IdentifierListInfo"
+          },
+          "status_list" : {
+            "$ref" : "#/components/schemas/id.walt.mdoc.objects.mso.Status.StatusListInfo"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "purpose" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "index" : {
+            "type" : "integer",
+            "format" : "int32",
+            "title" : "Int"
+          },
+          "uri" : {
+            "type" : "string",
+            "title" : "UniformResourceIdentifier"
+          }
+        },
+        "title" : "Status"
+      },
+      "id.walt.mdoc.objects.mso.Status.IdentifierListInfo" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "maximum" : 127,
+              "minimum" : -128,
+              "title" : "Byte"
+            },
+            "title" : "ByteArray<Byte>"
+          },
+          "uri" : {
+            "type" : "string",
+            "title" : "UniformResourceIdentifier"
+          },
+          "certificate" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "maximum" : 127,
+              "minimum" : -128,
+              "title" : "Byte"
+            },
+            "title" : "ByteArray<Byte>"
+          }
+        },
+        "required" : [ "id", "uri" ],
+        "title" : "Status.IdentifierListInfo"
+      },
+      "id.walt.mdoc.objects.mso.Status.StatusListInfo" : {
+        "type" : "object",
+        "properties" : {
+          "idx" : {
+            "type" : "integer",
+            "title" : "ULong"
+          },
+          "uri" : {
+            "type" : "string",
+            "title" : "UniformResourceIdentifier"
+          }
+        },
+        "required" : [ "idx", "uri" ],
+        "title" : "Status.StatusListInfo"
+      },
+      "vc-sd_jwt" : {
+        "type" : "object",
+        "properties" : {
+          "dmtype" : {
+            "$ref" : "#/components/schemas/id.walt.credentials.CredentialDetectorTypes.SDJWTVCSubType"
+          },
+          "disclosables" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string",
+                "title" : "String"
+              },
+              "title" : "LinkedHashSet<String>",
+              "uniqueItems" : true
+            },
+            "title" : "LinkedHashMap<String,LinkedHashSet<String>>"
+          },
+          "disclosures" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.credentials.signatures.sdjwt.SdJwtSelectiveDisclosure"
+            },
+            "title" : "ArrayList<SdJwtSelectiveDisclosure>"
+          },
+          "signedWithDisclosures" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "credentialData" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "originalCredentialData" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "issuer" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "subject" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "signature" : {
+            "$ref" : "#/components/schemas/id.walt.credentials.signatures.CredentialSignature"
+          },
+          "signed" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "format" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "credentialData", "dmtype", "format" ],
+        "title" : ""
+      },
+      "id.walt.credentials.CredentialDetectorTypes.SDJWTVCSubType" : {
+        "type" : "string",
+        "enum" : [ "sdjwtvcdm", "sdjwtvc" ],
+        "title" : "CredentialDetectorTypes.SDJWTVCSubType"
+      },
+      "jwt_vc_json" : {
+        "type" : "object",
+        "properties" : {
+          "format" : {
+            "$ref" : "#/components/schemas/id.walt.credentials.presentations.PresentationFormat"
+          },
+          "jwt" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "payload" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "issuer" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "audience" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "nonce" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "vp" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "credentials" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.credentials.formats.DigitalCredential"
+            },
+            "title" : "ArrayList<DigitalCredential>"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "format", "jwt", "payload" ],
+        "title" : ""
+      },
+      "ldp_vc" : {
+        "type" : "object",
+        "properties" : {
+          "format" : {
+            "$ref" : "#/components/schemas/id.walt.credentials.presentations.PresentationFormat"
+          },
+          "presentation" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "format", "presentation" ],
+        "title" : ""
+      },
+      "mso_mdoc" : {
+        "type" : "object",
+        "properties" : {
+          "format" : {
+            "$ref" : "#/components/schemas/id.walt.credentials.presentations.PresentationFormat"
+          },
+          "mdoc" : {
+            "$ref" : "#/components/schemas/vc-mdocs"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "format", "mdoc" ],
+        "title" : ""
+      },
+      "id.walt.verifier2.data.SessionFailure" : {
+        "anyOf" : [ {
+          "$ref" : "#/components/schemas/dcql_fulfillment"
+        }, {
+          "$ref" : "#/components/schemas/presentation_validation"
+        }, {
+          "$ref" : "#/components/schemas/vc_policy_violations"
+        }, {
+          "$ref" : "#/components/schemas/wallet_error_response"
+        } ],
+        "discriminator" : {
+          "propertyName" : "type"
+        },
+        "title" : "SessionFailure"
+      },
+      "dcql_fulfillment" : {
+        "type" : "object",
+        "properties" : {
+          "reason" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "failure" : {
+            "$ref" : "#/components/schemas/id.walt.verifier2.data.DcqlFulfillmentFailure"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "failure", "reason" ],
+        "title" : ""
+      },
+      "id.walt.verifier2.data.DcqlFulfillmentFailure" : {
+        "type" : "object",
+        "properties" : {
+          "missing_query_ids" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "LinkedHashSet<String>",
+            "uniqueItems" : true
+          },
+          "unsatisfied_sets" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.verifier2.data.UnsatisfiedSet"
+            },
+            "title" : "ArrayList<UnsatisfiedSet>"
+          },
+          "successfully_validated_query_ids" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "LinkedHashSet<String>",
+            "uniqueItems" : true
+          }
+        },
+        "required" : [ "missing_query_ids", "successfully_validated_query_ids", "unsatisfied_sets" ],
+        "title" : "DcqlFulfillmentFailure"
+      },
+      "id.walt.verifier2.data.UnsatisfiedSet" : {
+        "type" : "object",
+        "properties" : {
+          "options" : {
+            "type" : "array",
+            "items" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string",
+                "title" : "String"
+              },
+              "title" : "ArrayList<String>"
+            },
+            "title" : "ArrayList<ArrayList<String>>"
+          }
+        },
+        "required" : [ "options" ],
+        "title" : "UnsatisfiedSet"
+      },
+      "presentation_validation" : {
+        "type" : "object",
+        "properties" : {
+          "reason" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "failed_policies" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "object",
+              "additionalProperties" : {
+                "$ref" : "#/components/schemas/id.walt.policies2.vp.policies.VPPolicy2.PolicyRunResult"
+              },
+              "title" : "LinkedHashMap<String,VPPolicy2.PolicyRunResult>"
+            },
+            "title" : "LinkedHashMap<String,LinkedHashMap<String,VPPolicy2.PolicyRunResult>>"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "failed_policies", "reason" ],
+        "title" : ""
+      },
+      "vc_policy_violations" : {
+        "type" : "object",
+        "properties" : {
+          "reason" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "violations" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/id.walt.policies2.vc.CredentialPolicyResult"
+            },
+            "title" : "ArrayList<CredentialPolicyResult>"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "reason", "violations" ],
+        "title" : ""
+      },
+      "wallet_error_response" : {
+        "type" : "object",
+        "properties" : {
+          "reason" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "error" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "error_description" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "state" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "error", "reason" ],
+        "title" : ""
+      },
+      "id.walt.verifier2.data.Verification2Session" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "setup" : {
+            "$ref" : "#/components/schemas/id.walt.verifier2.data.VerificationSessionSetup"
+          },
+          "data" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonElement"
+          },
+          "creationDate" : {
+            "type" : "string",
+            "format" : "date-time",
+            "title" : "Instant"
+          },
+          "expirationDate" : {
+            "type" : "string",
+            "format" : "date-time",
+            "title" : "Instant"
+          },
+          "retentionDate" : {
+            "type" : "string",
+            "format" : "date-time",
+            "title" : "Instant"
+          },
+          "status" : {
+            "$ref" : "#/components/schemas/id.walt.verifier2.data.Verification2Session.VerificationSessionStatus"
+          },
+          "attempted" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "notifications" : {
+            "$ref" : "#/components/schemas/id.walt.ktornotifications.core.KtorSessionNotifications"
+          },
+          "reattemptable" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "bootstrapAuthorizationRequest" : {
+            "$ref" : "#/components/schemas/id.walt.verifier.openid.models.authorization.AuthorizationRequest"
+          },
+          "bootstrapAuthorizationRequestUrl" : {
+            "type" : "string",
+            "title" : "Url"
+          },
+          "authorizationRequest" : {
+            "$ref" : "#/components/schemas/id.walt.verifier.openid.models.authorization.AuthorizationRequest"
+          },
+          "authorizationRequestUrl" : {
+            "type" : "string",
+            "title" : "Url"
+          },
+          "signedAuthorizationRequestJwt" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "requestSigningKeyReference" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "ephemeralDecryptionKey" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "jwkThumbprint" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "requestMode" : {
+            "$ref" : "#/components/schemas/id.walt.verifier2.data.Verification2Session.RequestMode"
+          },
+          "policies" : {
+            "$ref" : "#/components/schemas/id.walt.verifier2.data.Verification2Session.DefinedVerificationPolicies"
+          },
+          "policy_results" : {
+            "$ref" : "#/components/schemas/id.walt.verifier2.verification2.Verifier2PolicyResults"
+          },
+          "presentation_validation_results" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "object",
+              "additionalProperties" : {
+                "$ref" : "#/components/schemas/id.walt.policies2.vp.policies.VPPolicy2.PolicyRunResult"
+              },
+              "title" : "LinkedHashMap<String,VPPolicy2.PolicyRunResult>"
+            },
+            "title" : "LinkedHashMap<String,LinkedHashMap<String,VPPolicy2.PolicyRunResult>>"
+          },
+          "redirects" : {
+            "$ref" : "#/components/schemas/id.walt.verifier2.data.Verification2Session.VerificationSessionRedirects"
+          },
+          "presented_raw_data" : {
+            "$ref" : "#/components/schemas/id.walt.verifier2.data.Verification2Session.PresentedRawData"
+          },
+          "presented_presentations" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "$ref" : "#/components/schemas/id.walt.credentials.presentations.formats.VerifiablePresentation"
+            },
+            "title" : "LinkedHashMap<String,VerifiablePresentation>"
+          },
+          "presented_credentials" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/components/schemas/id.walt.credentials.formats.DigitalCredential"
+              },
+              "title" : "ArrayList<DigitalCredential>"
+            },
+            "title" : "LinkedHashMap<String,ArrayList<DigitalCredential>>"
+          },
+          "statusReason" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "response_code" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "failure" : {
+            "$ref" : "#/components/schemas/id.walt.verifier2.data.SessionFailure"
+          }
+        },
+        "required" : [ "attempted", "authorizationRequest", "creationDate", "id", "policies", "reattemptable", "requestMode", "setup", "status" ],
+        "title" : "Verification2Session"
+      },
+      "id.walt.commons.config.list.TransactionDataProfile" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "displayName" : {
+            "type" : "string",
+            "title" : "String"
+          },
+          "fields" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "title" : "String"
+            },
+            "title" : "ArrayList<String>"
+          }
+        },
+        "required" : [ "displayName", "fields", "type" ],
+        "title" : "TransactionDataProfile"
+      },
+      "id.walt.vical.VicalFetchRequest" : {
+        "type" : "object",
+        "properties" : {
+          "vicalUrl" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "vicalUrl" ],
+        "title" : "VicalFetchRequest"
+      },
+      "id.walt.vical.VicalFetchResponse" : {
+        "type" : "object",
+        "properties" : {
+          "vicalBase64" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "title" : "VicalFetchResponse"
+      },
+      "id.walt.vical.VicalValidationRequest" : {
+        "type" : "object",
+        "properties" : {
+          "verificationKey" : {
+            "$ref" : "#/components/schemas/kotlinx.serialization.json.JsonObject"
+          },
+          "vicalBase64" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "verificationKey", "vicalBase64" ],
+        "title" : "VicalValidationRequest"
+      },
+      "id.walt.vical.VicalValidationResponse" : {
+        "type" : "object",
+        "properties" : {
+          "vicalValid" : {
+            "type" : "boolean",
+            "title" : "Boolean"
+          },
+          "vicalBase64" : {
+            "type" : "string",
+            "title" : "String"
+          }
+        },
+        "required" : [ "vicalValid" ],
+        "title" : "VicalValidationResponse"
+      }
+    },
+    "examples" : { }
+  },
+  "webhooks" : { }
+}
