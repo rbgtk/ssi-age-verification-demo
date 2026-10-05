@@ -1,0 +1,95 @@
+services:
+  issuer-api:
+    image: ${IMAGE_PREFIX}waltid/issuer-api2:${VERSION_TAG:-latest}
+    profiles:
+      - services
+      - identity
+      - all
+    env_file:
+      - .env
+    volumes:
+      - ./waltid-issuer/config:/waltid-issuer-api2/config
+    ports:
+      - "$ISSUER_API2_PORT:$ISSUER_API2_PORT"
+
+  verifier-api:
+    image: ${IMAGE_PREFIX}waltid/verifier-api2:${VERSION_TAG:-latest}
+    profiles:
+      - services
+      - identity
+      - all
+    env_file:
+      - .env
+    volumes:
+      - ./waltid-verifier/config:/waltid-verifier-api2/config
+    ports:
+      - "$VERIFIER_API2_PORT:$VERIFIER_API2_PORT"
+
+  wallet-api:
+    image: ${IMAGE_PREFIX}waltid/wallet-api2:${VERSION_TAG:-latest}
+    profiles:
+      - services
+      - identity
+      - all
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    volumes:
+      - ./waltid-wallet/config:/waltid-wallet-api2/config
+    ports:
+      - "$WALLET_API2_PORT:$WALLET_API2_PORT"
+
+  wallet-app:
+    build:
+      context: ./wallet-app
+    profiles:
+      - apps
+      - identity
+      - all
+    depends_on:
+      wallet-api:
+        condition: service_started
+    environment:
+      PORT: 8080
+      WALLET_API_URL: "http://wallet-api:$WALLET_API2_PORT"
+    ports:
+      - "$DEV_WALLET_FRONTEND_PORT:8080"
+
+  adult-site:
+    build:
+      context: ./adult-site
+    profiles:
+      - apps
+      - identity
+      - all
+    depends_on:
+      verifier-api:
+        condition: service_started
+    environment:
+      PORT: 8080
+      VERIFIER_API_URL: "http://verifier-api:$VERIFIER_API2_PORT"
+      AGE_CREDENTIAL_VCT: "http://$SERVICE_HOST:$ISSUER_API2_PORT/openid4vci/AgeCredential"
+    ports:
+      - "${ADULT_SITE_PORT:-8080}:8080"
+
+  postgres:
+    image: postgres:17-alpine
+    healthcheck:
+      test: ["CMD", "pg_isready", "-q", "-U", "$DB_USERNAME"]
+      interval: 5s
+      timeout: 1s
+      retries: 5
+    restart: always
+    environment:
+      POSTGRES_DB: $DB_NAME
+      POSTGRES_USER: $DB_USERNAME
+      POSTGRES_PASSWORD: $DB_PASSWORD
+    volumes:
+      - wallet-api-db:/var/lib/postgresql/data
+    ports:
+      - $POSTGRES_DB_PORT:5432 #TODO: tcp/udp proxy with caddy
+
+volumes:
+  wallet-api-db:
