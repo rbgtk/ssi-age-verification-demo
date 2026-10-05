@@ -1,0 +1,31 @@
+import { createServer } from 'node:http'
+import { createReadStream, existsSync, statSync } from 'node:fs'
+import { extname, join, normalize } from 'node:path'
+
+const port = Number(process.env.PORT || 8080)
+const upstream = (process.env.WALLET_API_URL || 'http://localhost:7006').replace(/\/$/, '')
+const root = join(import.meta.dirname, 'dist')
+const types = { '.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.ico':'image/x-icon' }
+
+createServer(async (req, res) => {
+  try {
+    if (req.url?.startsWith('/wallet-api/')) {
+      const target = `${upstream}${req.url.slice('/wallet-api'.length)}`
+      const headers = { ...req.headers }; delete headers.host; delete headers['content-length']
+      const chunks = []; for await (const chunk of req) chunks.push(chunk)
+      const response = await fetch(target, { method:req.method, headers, body:['GET','HEAD'].includes(req.method || '') ? undefined : Buffer.concat(chunks), redirect:'manual' })
+      // Node fetch transparently decodes compressed upstream bodies. Do not forward
+      // the now-stale encoding/length headers or browsers will decode them twice.
+      const responseHeaders = new Headers(response.headers)
+      responseHeaders.delete('content-encoding')
+      responseHeaders.delete('content-length')
+      responseHeaders.delete('transfer-encoding')
+      res.writeHead(response.status, Object.fromEntries(responseHeaders)); res.end(Buffer.from(await response.arrayBuffer())); return
+    }
+    const pathname = decodeURIComponent(new URL(req.url || '/', 'http://localhost').pathname)
+    const candidate = normalize(join(root, pathname))
+    const file = candidate.startsWith(root) && existsSync(candidate) && statSync(candidate).isFile() ? candidate : join(root, 'index.html')
+    res.writeHead(200, { 'content-type':types[extname(file)] || 'application/octet-stream', 'cache-control':file.endsWith('index.html')?'no-cache':'public, max-age=31536000, immutable' })
+    createReadStream(file).pipe(res)
+  } catch (error) { res.writeHead(502, {'content-type':'application/json'}); res.end(JSON.stringify({message:error instanceof Error?error.message:'Wallet proxy error'})) }
+}).listen(port, '0.0.0.0', () => console.log(`Wallet app listening on ${port}`))

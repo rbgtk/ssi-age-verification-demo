@@ -1,0 +1,15 @@
+<script setup lang="ts">
+import { useRouter } from 'vue-router'
+import { session } from './api'
+const router = useRouter()
+function logout() { session.token = ''; router.push('/auth') }
+</script>
+
+<template>
+  <header><router-link to="/wallet" class="brand"><span>18</span> Private Wallet</router-link><button v-if="session.token" class="quiet" @click="logout">Sign out</button></header>
+  <main><router-view /></main>
+</template>
+
+<style>
+:root{font-family:Inter,ui-sans-serif,system-ui,sans-serif;color:#eef1ff;background:#0a0b10;font-synthesis:none}*{box-sizing:border-box}body{margin:0;min-width:320px;background:radial-gradient(circle at 10% 0,#27214b 0,transparent 35%),#0a0b10;min-height:100vh}button,input,select,textarea{font:inherit}button{cursor:pointer}header{height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 max(24px,calc((100% - 1120px)/2));border-bottom:1px solid #ffffff18;background:#0a0b10cc;backdrop-filter:blur(12px);position:sticky;top:0;z-index:2}.brand{color:#fff;text-decoration:none;font-weight:750;letter-spacing:-.02em}.brand span{display:inline-grid;place-items:center;width:36px;height:36px;margin-right:10px;border-radius:10px;background:#8c6cff;color:#fff}main{max-width:1120px;margin:auto;padding:40px 24px 80px}h1,h2,h3,p{margin-top:0}h1{font-size:clamp(2rem,5vw,3.5rem);letter-spacing:-.05em;max-width:760px}.muted{color:#a6a8b8}.card{background:#14151d;border:1px solid #ffffff18;border-radius:20px;padding:24px;box-shadow:0 20px 60px #0004}.stack{display:grid;gap:16px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:18px}.field{display:grid;gap:7px;color:#b9bbca;font-size:.9rem}input,select,textarea{width:100%;color:#fff;background:#0d0e14;border:1px solid #ffffff24;border-radius:11px;padding:12px 13px;outline:none}input:focus,select:focus,textarea:focus{border-color:#8c6cff}textarea{min-height:120px;resize:vertical}.primary,.secondary,.quiet{border:0;border-radius:11px;padding:11px 16px;color:#fff}.primary{background:#7d5cff;font-weight:700}.secondary{background:#ffffff12;border:1px solid #ffffff1c}.quiet{background:transparent;color:#bbb}.danger{color:#ffaaa2}.notice{border-radius:12px;padding:12px 14px;background:#8c6cff20;border:1px solid #8c6cff55}.error{background:#ff625d18;border-color:#ff625d55}.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.between{justify-content:space-between}.tabs{display:flex;gap:6px;margin-bottom:24px;overflow:auto}.tabs button{white-space:nowrap}.tabs .active{background:#7d5cff}.item{padding:14px 0;border-top:1px solid #ffffff14;word-break:break-word}.item:first-child{border-top:0}.pill{display:inline-block;padding:4px 8px;border-radius:999px;background:#ffffff12;font-size:.78rem;color:#c8c9d5}pre{white-space:pre-wrap;word-break:break-word;background:#090a0f;padding:14px;border-radius:10px;color:#bbb;max-height:300px;overflow:auto}@media(max-width:600px){main{padding:28px 16px}header{padding:0 16px}.card{padding:18px}}
+</style>
