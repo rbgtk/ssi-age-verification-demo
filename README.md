@@ -23,14 +23,14 @@ The protected page is a harmless placeholder and contains no adult material.
 
 ```text
 ┌─────────────────┐   OpenID4VCI offer   ┌─────────────────┐
-│ Issuer portal   │ ───────────────────▶ │ Holder wallet   │
+│ Issuer portal   │ ──────────────────▶ │ Holder wallet   │
 │ + Issuer API    │   signed credential  │ + Wallet API    │
 └─────────────────┘                      └────────┬────────┘
                                                 │
                                       OpenID4VP │ selective disclosure
                                                 ▼
 ┌─────────────────┐   verified result   ┌─────────────────┐
-│ Age-restricted  │ ◀────────────────── │ Verifier API    │
+│ Age-restricted  │ ◀───────────────── │ Verifier API    │
 │ website         │                    │                 │
 └─────────────────┘                    └─────────────────┘
 ```
