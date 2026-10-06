@@ -7,6 +7,8 @@ services:
       - all
     env_file:
       - .env
+    environment:
+      SERVICE_HOST: issuer-api
     volumes:
       - ./waltid-issuer/config:/waltid-issuer-api2/config
     ports:
@@ -20,6 +22,8 @@ services:
       - all
     env_file:
       - .env
+    environment:
+      SERVICE_HOST: verifier-api
     volumes:
       - ./waltid-verifier/config:/waltid-verifier-api2/config
     ports:
@@ -38,6 +42,8 @@ services:
       - .env
     volumes:
       - ./waltid-wallet/config:/waltid-wallet-api2/config
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "$WALLET_API2_PORT:$WALLET_API2_PORT"
 
@@ -57,6 +63,22 @@ services:
     ports:
       - "$DEV_WALLET_FRONTEND_PORT:8080"
 
+  issuer-portal:
+    build:
+      context: ./issuer-portal
+    profiles:
+      - apps
+      - identity
+      - all
+    depends_on:
+      issuer-api:
+        condition: service_started
+    environment:
+      PORT: 8080
+      ISSUER_API_URL: "http://issuer-api:$ISSUER_API2_PORT"
+    ports:
+      - "${ISSUER_PORTAL_PORT:-7107}:8080"
+
   adult-site:
     build:
       context: ./adult-site
@@ -70,7 +92,7 @@ services:
     environment:
       PORT: 8080
       VERIFIER_API_URL: "http://verifier-api:$VERIFIER_API2_PORT"
-      AGE_CREDENTIAL_VCT: "http://$SERVICE_HOST:$ISSUER_API2_PORT/openid4vci/AgeCredential"
+      AGE_CREDENTIAL_VCT: "http://issuer-api:$ISSUER_API2_PORT/openid4vci/AgeCredential"
     ports:
       - "${ADULT_SITE_PORT:-8080}:8080"
 
