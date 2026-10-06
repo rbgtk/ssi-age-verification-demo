@@ -1,48 +1,13 @@
-# issuer-portal
+# Issuer portal
 
-This template should help get you started developing with Vue 3 in Vite.
+Vue portal for creating OpenID4VCI credential offers through the walt.id Issuer API v2.
 
-## Recommended IDE Setup
+It loads profiles from `GET /issuer2/profiles` and creates single- or multi-credential offers with `POST /issuer2/credential-offers`. The UI supports pre-authorized and authorization-code flows, by-reference and by-value delivery, expiry, transaction codes, issuer-state mode, and runtime overrides.
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## Development
 
-## Recommended Browser Setup
+Start the issuer API on port 7005, then run `npm install` and `npm run dev`. Vite proxies `/issuer-api` to `ISSUER_API_URL` or `http://localhost:7005`.
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+## Docker Compose
 
-## Type Support for `.vue` Imports in TS
-
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
-```sh
-npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Type-Check, Compile and Minify for Production
-
-```sh
-npm run build
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
+From the repository root run `docker compose --profile identity up --build`, then open <http://localhost:7107>.

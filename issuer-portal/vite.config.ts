@@ -15,4 +15,13 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  server: {
+    proxy: {
+      '/issuer-api': {
+        target: process.env.ISSUER_API_URL || 'http://localhost:7005',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/issuer-api/, ''),
+      },
+    },
+  },
 })
