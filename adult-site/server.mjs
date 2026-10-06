@@ -29,7 +29,15 @@ function collect(node, key, out = []) {
 
 export function interpretVerification(info) {
   const statuses = collect(info, 'status').filter(v => typeof v === 'string').map(v => v.toLowerCase())
-  const errors = collect(info, 'error').concat(collect(info, 'errors')).filter(Boolean)
+  const errors = collect(info, 'error')
+    .concat(collect(info, 'errors'))
+    .flat(Infinity)
+    .filter(value => {
+      if (typeof value === 'string') return value.trim().length > 0
+      if (!value) return false
+      if (typeof value === 'object') return Object.keys(value).length > 0
+      return true
+    })
   const terminalFailure = statuses.some(v => /reject|declin|fail|error|invalid|cancel/.test(v)) || errors.length > 0
   if (terminalFailure) return { status: 'rejected', message: 'The wallet declined the request or the presentation was invalid.' }
   if (statuses.some(v => /expir/.test(v))) return { status: 'expired', message: 'The verification session expired. Please start again.' }
@@ -38,11 +46,15 @@ export function interpretVerification(info) {
   const terminalSuccess = statuses.some(v => /success|verified|complete|done/.test(v)) || verifiedFlags.includes(true)
   if (!terminalSuccess) return { status: 'pending', message: 'Waiting for your wallet…' }
 
-  const ageClaims = collect(info, 'age_over_18')
-  if (ageClaims.length !== 1 || typeof ageClaims[0] !== 'boolean') {
+  const presentedCredentials = info.presented_credentials?.age_credential
+  if (!Array.isArray(presentedCredentials) || presentedCredentials.length !== 1) {
     return { status: 'rejected', message: 'The verified presentation did not contain one valid 18+ claim.' }
   }
-  return ageClaims[0]
+  const ageClaim = presentedCredentials[0]?.credentialData?.age_over_18
+  if (typeof ageClaim !== 'boolean') {
+    return { status: 'rejected', message: 'The verified presentation did not contain one valid 18+ claim.' }
+  }
+  return ageClaim
     ? { status: 'success', message: 'Your 18+ proof was verified. No identity details were stored.' }
     : { status: 'underage', message: 'This credential does not prove that its holder is over 18.' }
 }

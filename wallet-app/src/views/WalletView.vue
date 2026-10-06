@@ -12,6 +12,8 @@ const keys = ref<Obj[]>([])
 const dids = ref<Obj[]>([])
 const walletInfo = ref<Obj>({})
 const credentials = ref<Obj[]>([])
+const selectedCredential = ref<Obj | null>(null)
+const credentialLoading = ref(false)
 const tab = ref('credentials')
 const error = ref('')
 const message = ref('')
@@ -48,6 +50,7 @@ async function loadWallets() {
   })
 }
 async function loadData() {
+  selectedCredential.value = null
   ;[walletInfo.value, keys.value, dids.value, credentials.value] = await Promise.all([
     api<Obj>(`/wallet/${walletId.value}`),
     api<Obj[]>(`/wallet/${walletId.value}/keys`),
@@ -55,6 +58,23 @@ async function loadData() {
     api<Obj[]>(`/wallet/${walletId.value}/credentials?showDeleted=false&showPending=false`),
   ])
   await applyDefaultInvariants()
+}
+async function inspectCredential(credential: Obj) {
+  credentialLoading.value = true
+  error.value = ''
+  try {
+    selectedCredential.value = await api<Obj>(
+      `/wallet/${walletId.value}/credentials/${encodeURIComponent(String(credential.id))}`,
+    )
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : 'Could not load the credential.'
+  } finally {
+    credentialLoading.value = false
+  }
+}
+function credentialContents(value: Obj | null) {
+  const credential = value?.credential as Obj | undefined
+  return credential?.credentialData || credential?.originalCredentialData || credential || {}
 }
 async function applyDefaultInvariants() {
   if (keys.value.length === 1 && walletInfo.value.defaultKeyId !== keys.value[0]?.keyId) {
@@ -207,7 +227,12 @@ async function acceptOffer() {
       offerJson = JSON.parse(offerUrl)
       offerUrl = ''
     }
-    const body: Obj = { clientId: '', redirectUri: '', tokenRequestHeaders: {} }
+    const walletOrigin = window.location.origin
+    const body: Obj = {
+      clientId: walletOrigin,
+      redirectUri: `${walletOrigin}/wallet`,
+      tokenRequestHeaders: {},
+    }
     if (offerUrl) body.offerUrl = offerUrl
     if (offerJson) body.offerJson = offerJson
     if (txCode.value) body.txCode = txCode.value
@@ -306,25 +331,47 @@ onMounted(async () => {
         <h2>Credentials</h2>
         <p class="muted">Stored in the selected wallet.</p>
         <div v-if="!credentials.length" class="item muted">No credentials yet.</div>
-        <div v-for="c in credentials" :key="c.id" class="item">
+        <button
+          v-for="c in credentials"
+          :key="c.id"
+          type="button"
+          class="item credential-row"
+          :class="{ selected: selectedCredential?.id === c.id }"
+          @click="inspectCredential(c)"
+        >
           <div class="row between">
             <strong>{{ c.label || 'Verifiable credential' }}</strong
-            ><span class="pill">{{ c.format }}</span>
+            ><span class="row"><span class="pill">{{ c.format }}</span><span class="chevron">›</span></span>
           </div>
           <small class="muted">{{ c.issuer || c.id }}</small>
-        </div>
+        </button>
       </div>
-      <div class="card">
-        <h2>Wallet health</h2>
-        <div class="item">
-          <b>{{ keys.length }}</b> keys
-        </div>
-        <div class="item">
-          <b>{{ dids.length }}</b> decentralized identifiers
-        </div>
-        <div class="item">
-          <b>{{ credentials.length }}</b> credentials
-        </div>
+      <div class="card credential-detail">
+        <template v-if="credentialLoading">
+          <h2>Credential details</h2>
+          <p class="muted">Loading credential…</p>
+        </template>
+        <template v-else-if="selectedCredential">
+          <div class="row between">
+            <div>
+              <span class="pill">{{ selectedCredential.credential?.format || selectedCredential.metadata?.format || 'Credential' }}</span>
+              <h2>{{ selectedCredential.label || 'Credential details' }}</h2>
+            </div>
+            <button class="quiet detail-close" aria-label="Close credential details" @click="selectedCredential = null">×</button>
+          </div>
+          <div class="detail-meta">
+            <div v-if="selectedCredential.credential?.issuer"><small class="muted">Issuer</small><span>{{ selectedCredential.credential.issuer }}</span></div>
+            <div v-if="selectedCredential.credential?.subject"><small class="muted">Subject</small><span>{{ selectedCredential.credential.subject }}</span></div>
+            <div v-if="selectedCredential.addedAt"><small class="muted">Added</small><span>{{ new Date(selectedCredential.addedAt).toLocaleString() }}</span></div>
+          </div>
+          <h3>Credential contents</h3>
+          <pre>{{ JSON.stringify(credentialContents(selectedCredential), null, 2) }}</pre>
+        </template>
+        <template v-else>
+          <h2>Credential details</h2>
+          <div class="detail-empty"><span>⌁</span><p>Select a credential to view its contents.</p></div>
+          <div class="wallet-summary"><span><b>{{ keys.length }}</b> keys</span><span><b>{{ dids.length }}</b> DIDs</span><span><b>{{ credentials.length }}</b> credentials</span></div>
+        </template>
       </div>
     </section>
     <section v-if="tab === 'offers'" class="card stack">
@@ -509,9 +556,9 @@ small {
   margin: 6px 0 12px;
 }
 .default {
-  color: #dcd3ff;
-  background: #7957ff55;
-  border: 1px solid #9c84ff88;
+  color: #c7dbff;
+  background: #176bff3d;
+  border: 1px solid #4185ff88;
 }
 .linked-dids {
   margin: 14px 0;
@@ -526,7 +573,7 @@ small {
   overflow-wrap: anywhere;
 }
 .link-line {
-  color: #8c6cff;
+  color: #4185ff;
 }
 .no-link {
   margin: 14px 0;
