@@ -31,8 +31,8 @@ The protected page is a harmless placeholder and contains no adult material.
                                                 ▼
 ┌─────────────────┐   verified result   ┌─────────────────┐
 │ Age-restricted  │ ◀───────────────── │ Verifier API    │
-│ website         │                    │                 │
-└─────────────────┘                    └─────────────────┘
+│ website         │                     │                 │
+└─────────────────┘                     └─────────────────┘
 ```
 
 ## Components
