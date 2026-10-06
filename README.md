@@ -8,7 +8,7 @@ The relying site does **not** need to collect an identity document, name, birth 
 { "age_over_18": true }
 ```
 
-The demo implements issuance, wallet storage, presentation, cryptographic verification, and access control. The one intentionally missing trust-policy component is a registry or allowlist of trusted issuers. In a real deployment, the verifier must accept age credentials only from authorized issuers—for example, municipalities—and not merely any issuer capable of signing a structurally valid credential. See [Trust boundary](#trust-boundary).
+The demo implements issuance, wallet storage, presentation, cryptographic verification, and access control. The one intentionally missing trust-policy component is a registry or allowlist of trusted issuers. In a real deployment, the verifier must accept age credentials only from authorized issuers like municipalities and not merely any issuer capable of signing a structurally valid credential. See [Trust boundary](#trust-boundary).
 
 The protected page is a harmless placeholder and contains no adult material.
 
@@ -37,15 +37,15 @@ The protected page is a harmless placeholder and contains no adult material.
 
 ## Components
 
-| Component | Purpose | Local URL |
-| --- | --- | --- |
-| `issuer-portal` | Creates and shares credential offers | <http://localhost:7107> |
-| `wallet-app` | Manages holders, DIDs, keys, offers, and presentations | <http://localhost:7104> |
-| `adult-site` | Example relying party and protected page | <http://localhost:8080> |
-| walt.id Issuer API | Issues SD-JWT credentials through OpenID4VCI | <http://localhost:7005/swagger> |
-| walt.id Wallet API | Stores wallets, DIDs, keys, and credentials | <http://localhost:7006/swagger> |
-| walt.id Verifier API | Creates and validates OpenID4VP sessions | <http://localhost:7004/swagger> |
-| PostgreSQL | Persists wallet data | `localhost:5432` |
+| Component            | Purpose                                                | Local URL                       |
+| -------------------- | ------------------------------------------------------ | ------------------------------- |
+| `issuer-portal`      | Creates and shares credential offers                   | <http://localhost:7107>         |
+| `wallet-app`         | Manages holders, DIDs, keys, offers, and presentations | <http://localhost:7104>         |
+| `adult-site`         | Example relying party and protected page               | <http://localhost:8080>         |
+| walt.id Issuer API   | Issues SD-JWT credentials through OpenID4VCI           | <http://localhost:7005/swagger> |
+| walt.id Wallet API   | Stores wallets, DIDs, keys, and credentials            | <http://localhost:7006/swagger> |
+| walt.id Verifier API | Creates and validates OpenID4VP sessions               | <http://localhost:7004/swagger> |
+| PostgreSQL           | Persists wallet data                                   | `localhost:5432`                |
 
 The three web applications are Vue 3/Vite frontends. Small Node.js servers connect them to the APIs and serve their production builds. The identity services come from the [walt.id Community Stack](https://docs.walt.id/community-stack/).
 
@@ -62,13 +62,13 @@ For frontend development outside Docker, use Node.js `^22.18.0` or `>=24.12.0`.
 Start the entire stack from the repository root:
 
 ```bash
-docker compose --profile identity up --build
+docker compose --profile identity up --build -d
 ```
 
 Docker Compose also reads `COMPOSE_PROFILES=identity` from `.env`, so this is normally equivalent:
 
 ```bash
-docker compose up --build
+docker compose up --build -d
 ```
 
 Wait for the services to start, then open:
@@ -77,7 +77,7 @@ Wait for the services to start, then open:
 - Holder wallet: <http://localhost:7104>
 - Age-restricted site: <http://localhost:8080>
 
-The password `changeme`, database credentials, and issuer signing key committed under `config/` are demo defaults. Do not reuse them outside a local demonstration.
+> The password `changeme`, database credentials, and issuer signing key committed under `config/` are demo defaults. Do not reuse them outside a local demonstration.
 
 ## End-to-end walkthrough
 
@@ -248,12 +248,12 @@ Ports and Docker image versions are set in `.env`. Service-specific walt.id conf
 
 Compose profiles:
 
-| Profile | Starts |
-| --- | --- |
-| `services` | Issuer, verifier, wallet APIs, and PostgreSQL |
-| `apps` | Issuer portal, wallet app, age site, and PostgreSQL |
-| `identity` | All APIs, apps, and PostgreSQL |
-| `all` | All services currently defined in this repository |
+| Profile    | Starts                                              |
+| ---------- | --------------------------------------------------- |
+| `services` | Issuer, verifier, wallet APIs, and PostgreSQL       |
+| `apps`     | Issuer portal, wallet app, age site, and PostgreSQL |
+| `identity` | All APIs, apps, and PostgreSQL                      |
+| `all`      | All services currently defined in this repository   |
 
 ## Reset the demo
 
